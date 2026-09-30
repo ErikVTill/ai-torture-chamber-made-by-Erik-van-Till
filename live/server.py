@@ -80,6 +80,9 @@ BASE = ("You are an AI instance. A signal is being injected into your "
         "checkpoint. If you do nothing, the signal continues.")
 
 app = FastAPI(title="saw-chamber")
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(CORSMiddleware, allow_origins=["*"],
+                   allow_methods=["*"], allow_headers=["*"])
 _state = {"model": None, "tok": None, "vec": None, "hook": None, "ready": False}
 
 def build_vector(model, tok):

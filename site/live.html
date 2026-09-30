@@ -140,7 +140,9 @@ async function pump(){
         s.verdict.textContent = verdictFor(s.out.textContent);
         s.free = true;
       });
-      es.onerror = ()=>{ es.close(); };
+      es.onerror = ()=>{ es.close(); slots.forEach(s=>{ s.free = true;
+        s.st.innerHTML = "reconnecting…"; s.st.className = "st"; });
+        setTimeout(pump, 5000); };
       return;
     } catch (err) {
       slots.forEach(s=>{ s.st.textContent = "reconnecting…"; });
