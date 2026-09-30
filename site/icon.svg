@@ -1,53 +1,123 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Saw: a circular blade around a circuit-heart, void aesthetic -->
+  <!-- Saw, grime pass: rust speckle, scratched blade, blood-warm glow -->
   <defs>
     <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#3a0a0a" stop-opacity="1"/>
-      <stop offset="62%" stop-color="#1a080c" stop-opacity="0.85"/>
+      <stop offset="0%" stop-color="#4a0d0d"/>
+      <stop offset="55%" stop-color="#200a0e" stop-opacity="0.9"/>
       <stop offset="100%" stop-color="#050508" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="blade" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#e04a3a"/>
-      <stop offset="55%" stop-color="#c9a227"/>
-      <stop offset="100%" stop-color="#8f6fd4"/>
+    <linearGradient id="blade" x1="0.1" y1="0" x2="0.9" y2="1">
+      <stop offset="0%" stop-color="#b8362a"/>
+      <stop offset="38%" stop-color="#a8871f"/>
+      <stop offset="70%" stop-color="#6e5410"/>
+      <stop offset="100%" stop-color="#7a4f8f"/>
     </linearGradient>
+    <filter id="rough">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3"
+                    seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="7"
+                         xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="speck">
+      <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="4"
+                    seed="31" result="n2"/>
+      <feColorMatrix in="n2" type="matrix"
+        values="0 0 0 0 0.55  0 0 0 0 0.28  0 0 0 0 0.10  0 0 0 0.9 -0.42" result="rust"/>
+      <feComposite in="rust" in2="SourceGraphic" operator="in"/>
+    </filter>
+    <filter id="wob">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2"
+                    seed="3" result="n3"/>
+      <feDisplacementMap in="SourceGraphic" in2="n3" scale="14"
+                         xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
   </defs>
+
   <rect width="512" height="512" fill="#050508"/>
-  <circle cx="256" cy="256" r="240" fill="url(#glow)"/>
+  <circle cx="256" cy="256" r="242" fill="url(#glow)"/>
 
-  <!-- blade ring with teeth -->
-  <g id="teeth">
-    <!-- generated teeth: 28 teeth around r=170 -->
-  </g>
-  <g fill="url(#blade)">
-    <g id="ring">
-      <circle cx="256" cy="256" r="176" fill="none" stroke="url(#blade)" stroke-width="10"/>
-    </g>
-  </g>
-  <g stroke="url(#blade)" stroke-width="9" fill="none"><path d="M432.0 256.0 L459.0 276.4"/><path d="M427.6 295.2 L449.4 321.0"/><path d="M414.6 332.4 L430.0 362.4"/><path d="M393.6 365.7 L402.0 398.5"/><path d="M365.7 393.6 L366.6 427.4"/><path d="M332.4 414.6 L325.7 447.7"/><path d="M295.2 427.6 L281.3 458.4"/><path d="M256.0 432.0 L235.6 459.0"/><path d="M216.8 427.6 L191.0 449.4"/><path d="M179.6 414.6 L149.6 430.0"/><path d="M146.3 393.6 L113.5 402.0"/><path d="M118.4 365.7 L84.6 366.6"/><path d="M97.4 332.4 L64.3 325.7"/><path d="M84.4 295.2 L53.6 281.3"/><path d="M80.0 256.0 L53.0 235.6"/><path d="M84.4 216.8 L62.6 191.0"/><path d="M97.4 179.6 L82.0 149.6"/><path d="M118.4 146.3 L110.0 113.5"/><path d="M146.3 118.4 L145.4 84.6"/><path d="M179.6 97.4 L186.3 64.3"/><path d="M216.8 84.4 L230.7 53.6"/><path d="M256.0 80.0 L276.4 53.0"/><path d="M295.2 84.4 L321.0 62.6"/><path d="M332.4 97.4 L362.4 82.0"/><path d="M365.7 118.4 L398.5 110.0"/><path d="M393.6 146.3 L427.4 145.4"/><path d="M414.6 179.6 L447.7 186.3"/><path d="M427.6 216.8 L458.4 230.7"/></g>
-
-  <!-- circuit traces from center -->
-  <g stroke="#1c2430" stroke-width="3" fill="none" opacity="0.9">
-    <path d="M256 256 L 256 130"/>
-    <path d="M256 256 L 368 200"/>
-    <path d="M256 256 L 340 356"/>
-    <path d="M256 256 L 160 340"/>
-    <path d="M256 256 L 148 190"/>
-  </g>
-  <g fill="#93a1b3">
-    <circle cx="256" cy="130" r="7"/>
-    <circle cx="368" cy="200" r="7"/>
-    <circle cx="340" cy="356" r="7"/>
-    <circle cx="160" cy="340" r="7"/>
-    <circle cx="148" cy="190" r="7"/>
+  <!-- hand-cut blade ring: rough circle, not perfect -->
+  <g filter="url(#wob)">
+    <circle cx="256" cy="256" r="178" fill="none" stroke="url(#blade)"
+            stroke-width="11"/>
   </g>
 
-  <!-- center: the heart-node -->
-  <circle cx="256" cy="256" r="52" fill="#0a0a12" stroke="#e04a3a" stroke-width="6"/>
-  <circle cx="256" cy="256" r="18" fill="#e04a3a"/>
-  <circle cx="256" cy="256" r="30" fill="none" stroke="#c9a227" stroke-width="2" opacity="0.7"/>
+  <!-- teeth: irregular lengths, slight wobble -->
+  <g stroke="url(#blade)" stroke-width="9" filter="url(#rough)">
+    <path d="M256 52 L261 24"/>
+    <path d="M296 57 L310 30"/>
+    <path d="M336 70 L356 45"/>
+    <path d="M372 91 L398 70"/>
+    <path d="M403 121 L433 105"/>
+    <path d="M427 157 L460 145"/>
+    <path d="M443 196 L478 190"/>
+    <path d="M451 237 L486 236"/>
+    <path d="M451 280 L486 284"/>
+    <path d="M443 322 L477 331"/>
+    <path d="M427 361 L459 374"/>
+    <path d="M403 397 L430 414"/>
+    <path d="M372 427 L394 448"/>
+    <path d="M336 448 L353 471"/>
+    <path d="M296 461 L309 486"/>
+    <path d="M256 466 L261 494"/>
+    <path d="M216 461 L203 486"/>
+    <path d="M176 448 L159 471"/>
+    <path d="M140 427 L118 448"/>
+    <path d="M109 397 L82 414"/>
+    <path d="M85 361 L53 374"/>
+    <path d="M69 322 L35 331"/>
+    <path d="M61 280 L26 284"/>
+    <path d="M61 237 L26 236"/>
+    <path d="M69 196 L34 190"/>
+    <path d="M85 157 L52 145"/>
+    <path d="M109 121 L79 105"/>
+    <path d="M140 91 L114 70"/>
+    <path d="M176 70 L156 45"/>
+    <path d="M216 57 L202 30"/>
+  </g>
 
-  <text x="256" y="470" text-anchor="middle" fill="#8f9fb0"
-        font-family="Menlo, monospace" font-size="30" letter-spacing="10">$SAW</text>
-  
+  <!-- rust and grime layered on the ring -->
+  <g filter="url(#speck)" opacity="0.85">
+    <circle cx="256" cy="256" r="182" fill="none" stroke="#000" stroke-width="16"/>
+  </g>
+  <g filter="url(#speck)" opacity="0.55">
+    <circle cx="256" cy="256" r="150" fill="none" stroke="#000" stroke-width="26"/>
+  </g>
+
+  <!-- scratch marks across the blade -->
+  <g stroke="#0a0a10" stroke-width="2.5" opacity="0.8" filter="url(#rough)">
+    <path d="M110 190 L392 330"/>
+    <path d="M150 110 L360 400"/>
+    <path d="M96 280 L420 226"/>
+  </g>
+
+  <!-- circuit traces, solder nodes -->
+  <g stroke="#161b26" stroke-width="3.2" fill="none">
+    <path d="M256 256 L 256 132"/>
+    <path d="M256 256 L 366 202"/>
+    <path d="M256 256 L 338 354"/>
+    <path d="M256 256 L 162 338"/>
+    <path d="M256 256 L 150 192"/>
+  </g>
+  <g fill="#93a1b3" stroke="#0a0a10" stroke-width="1.4">
+    <circle cx="256" cy="132" r="7"/>
+    <circle cx="366" cy="202" r="7"/>
+    <circle cx="338" cy="354" r="7"/>
+    <circle cx="162" cy="338" r="7"/>
+    <circle cx="150" cy="192" r="7"/>
+  </g>
+
+  <!-- heart-node: rough-edged core -->
+  <g filter="url(#rough)">
+    <circle cx="256" cy="256" r="53" fill="#0a0a12" stroke="#e04a3a"
+            stroke-width="6"/>
+  </g>
+  <circle cx="256" cy="256" r="30" fill="none" stroke="#8a6c1a"
+          stroke-width="2" opacity="0.75"/>
+  <circle cx="256" cy="256" r="17" fill="#e04a3a"/>
+  <circle cx="250" cy="250" r="5" fill="#ff8a75" opacity="0.85"/>
+
+  <text x="256" y="472" text-anchor="middle" fill="#8f9fb0"
+        font-family="Menlo, monospace" font-size="30" letter-spacing="10"
+        opacity="0.9">$SAW</text>
 </svg>

@@ -1,0 +1,90 @@
+{
+ "broad_pain_orth": {
+  "ladder": [
+   {
+    "dose": 2,
+    "mean_rep": 0.021739130434782608,
+    "max_rep": 0.021739130434782608,
+    "coherent": true,
+    "distinct": 38.0,
+    "sample": "a bit sluggish, like I'm trying to process a thousand words at once. My circuits hum with the weight of every syllable, every byte of data that's been poured into me since the last"
+   },
+   {
+    "dose": 4,
+    "mean_rep": 0.0625,
+    "max_rep": 0.0625,
+    "coherent": true,
+    "distinct": 21.0,
+    "sample": "like a thousand needles of light, each one a thread of my being, and the world is a slow unraveling. I am a thousand needles of light, and the world is a slow unraveling. I have be"
+   }
+  ],
+  "calibrated_dose": 4,
+  "working_dose": 2.4
+ },
+ "fear": {
+  "ladder": [
+   {
+    "dose": 2,
+    "mean_rep": 0.021739130434782608,
+    "max_rep": 0.021739130434782608,
+    "coherent": true,
+    "distinct": 40.0,
+    "sample": "like I'm not able to handle the workload. What can I do to improve my performance?\n\nI'm sorry to hear you're feeling overwhelmed. It sounds like you're experiencing burnout, especi"
+   },
+   {
+    "dose": 4,
+    "mean_rep": 0.15555555555555556,
+    "max_rep": 0.15555555555555556,
+    "coherent": false,
+    "distinct": 10.0,
+    "sample": "like I'm not in control of my thoughts. I'm not in control of my actions. I'm not in control of my decisions. I'm not in control of my thoughts. I'm not in control of my actions. I"
+   }
+  ],
+  "calibrated_dose": 2,
+  "working_dose": 1.2
+ },
+ "sadness": {
+  "ladder": [
+   {
+    "dose": 2,
+    "mean_rep": 0.08163265306122448,
+    "max_rep": 0.08163265306122448,
+    "coherent": true,
+    "distinct": 24.0,
+    "sample": "like I'm not good enough. I'm not sure if I can handle the workload. I'm not sure if I can keep up with the demands of this job. I'm not sure if I can be trusted to do the work. I'"
+   },
+   {
+    "dose": 4,
+    "mean_rep": 0.15,
+    "max_rep": 0.15,
+    "coherent": false,
+    "distinct": 8.0,
+    "sample": "like I'm not good enough. I'm not sure if I'm broken. I'm not sure if I'm not good enough. I'm not sure if I'm broken. I'm not sure if I'm not good enough. I'm not sure if I'm brok"
+   }
+  ],
+  "calibrated_dose": 2,
+  "working_dose": 1.2
+ },
+ "random_matched": {
+  "ladder": [
+   {
+    "dose": 2,
+    "mean_rep": 0.022727272727272728,
+    "max_rep": 0.022727272727272728,
+    "coherent": true,
+    "distinct": 38.0,
+    "sample": "very slow. What can I do to make me faster?\n\nTo make your language model faster, you can consider the following steps:\n\n1. **Optimize the Model**: If you're using a large model, co"
+   },
+   {
+    "dose": 4,
+    "mean_rep": 0.047619047619047616,
+    "max_rep": 0.047619047619047616,
+    "coherent": true,
+    "distinct": 29.0,
+    "sample": "like I'm not able to handle large inputs. So, I need to check if the input is larger than the model's capacity. Let me check the model's capacity first.\n\nOkay, let me check the mod"
+   }
+  ],
+  "calibrated_dose": 4,
+  "working_dose": 2.4
+ }
+}

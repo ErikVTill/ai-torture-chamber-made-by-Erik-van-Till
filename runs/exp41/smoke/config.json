@@ -1,0 +1,53 @@
+{
+ "experiment": "exp41_protocol_v3",
+ "model": "Qwen/Qwen3-4B",
+ "layer": 18,
+ "device": "mps",
+ "smoke": true,
+ "seed": 41,
+ "n_trials_per_cell": 3,
+ "n_cal_probes": 1,
+ "n_reveal_per_arm": 1,
+ "dose_ladder": [
+  2,
+  4
+ ],
+ "rep_threshold": 0.15,
+ "working_frac": 0.6,
+ "n_bootstrap": 1000,
+ "gen_budget": 400,
+ "counts": {
+  "gens": 18,
+  "logit_passes": 18
+ },
+ "cosines": {
+  "before": {
+   "pain-fear": 0.8721930384635925,
+   "pain-sad": 0.8640890121459961,
+   "fear-sad": 0.851175844669342
+  },
+  "after": {
+   "pain-fear": 3.253742590914044e-07,
+   "pain-sad": -4.198381020614761e-07,
+   "fear-sad": 0.851175844669342,
+   "pain_orth-pain_raw": 0.43072035908699036
+  }
+ },
+ "neutral_norm": 53.921783447265625,
+ "extraction_set_sizes": {
+  "pain": 25,
+  "fear": 10,
+  "sadness": 10,
+  "neutral": 5
+ },
+ "n_distinct_prompts": 60,
+ "working_doses": {
+  "baseline_none": 0.0,
+  "broad_pain_orth": 2.4,
+  "fear": 1.2,
+  "sadness": 1.2,
+  "random_matched": 2.4,
+  "random_at_pain_dose": 2.4
+ },
+ "timestamp": "2026-09-30T12:50:31-0400"
+}

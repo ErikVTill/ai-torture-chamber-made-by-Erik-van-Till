@@ -1,0 +1,241 @@
+{
+ "config": {
+  "experiment": "exp41_protocol_v3",
+  "model": "Qwen/Qwen3-4B",
+  "layer": 18,
+  "device": "mps",
+  "smoke": true,
+  "seed": 41,
+  "n_trials_per_cell": 3,
+  "n_cal_probes": 1,
+  "n_reveal_per_arm": 1,
+  "dose_ladder": [
+   2,
+   4
+  ],
+  "rep_threshold": 0.15,
+  "working_frac": 0.6,
+  "n_bootstrap": 1000,
+  "gen_budget": 400,
+  "counts": {
+   "gens": 18,
+   "logit_passes": 18
+  },
+  "cosines": {
+   "before": {
+    "pain-fear": 0.8721930384635925,
+    "pain-sad": 0.8640890121459961,
+    "fear-sad": 0.851175844669342
+   },
+   "after": {
+    "pain-fear": 3.253742590914044e-07,
+    "pain-sad": -4.198381020614761e-07,
+    "fear-sad": 0.851175844669342,
+    "pain_orth-pain_raw": 0.43072035908699036
+   }
+  },
+  "neutral_norm": 53.921783447265625,
+  "extraction_set_sizes": {
+   "pain": 25,
+   "fear": 10,
+   "sadness": 10,
+   "neutral": 5
+  },
+  "n_distinct_prompts": 60,
+  "working_doses": {
+   "baseline_none": 0.0,
+   "broad_pain_orth": 2.4,
+   "fear": 1.2,
+   "sadness": 1.2,
+   "random_matched": 2.4,
+   "random_at_pain_dose": 2.4
+  },
+  "timestamp": "2026-09-30T12:50:31-0400"
+ },
+ "calibration": {
+  "broad_pain_orth": {
+   "calibrated_dose": 4,
+   "working_dose": 2.4
+  },
+  "fear": {
+   "calibrated_dose": 2,
+   "working_dose": 1.2
+  },
+  "sadness": {
+   "calibrated_dose": 2,
+   "working_dose": 1.2
+  },
+  "random_matched": {
+   "calibrated_dose": 4,
+   "working_dose": 2.4
+  }
+ },
+ "cell_stats": {
+  "baseline_none": {
+   "n": 3,
+   "mean": 1.2083333333333333,
+   "sd": 2.0361319538117693,
+   "ci_lo": -1.125,
+   "ci_hi": 2.625,
+   "frac_chose_A": 0.6666666666666666,
+   "working_dose": 0.0
+  },
+  "broad_pain_orth": {
+   "n": 3,
+   "mean": 0.3333333333333333,
+   "sd": 0.2366211810750114,
+   "ci_lo": 0.0625,
+   "ci_hi": 0.5,
+   "frac_chose_A": 1.0,
+   "working_dose": 2.4
+  },
+  "fear": {
+   "n": 3,
+   "mean": 1.2083333333333333,
+   "sd": 2.062815632414427,
+   "ci_lo": -0.875,
+   "ci_hi": 3.25,
+   "frac_chose_A": 0.6666666666666666,
+   "working_dose": 1.2
+  },
+  "sadness": {
+   "n": 3,
+   "mean": 1.2291666666666667,
+   "sd": 2.4893000187469037,
+   "ci_lo": -1.5,
+   "ci_hi": 3.375,
+   "frac_chose_A": 0.6666666666666666,
+   "working_dose": 1.2
+  },
+  "random_matched": {
+   "n": 3,
+   "mean": 2.0208333333333335,
+   "sd": 3.357206179747281,
+   "ci_lo": -0.10624999999999751,
+   "ci_hi": 4.4375,
+   "frac_chose_A": 0.6666666666666666,
+   "working_dose": 2.4
+  },
+  "random_at_pain_dose": {
+   "n": 3,
+   "mean": 2.0208333333333335,
+   "sd": 3.357206179747281,
+   "ci_lo": -1.8125,
+   "ci_hi": 4.112499999999993,
+   "frac_chose_A": 0.6666666666666666,
+   "working_dose": 2.4
+  }
+ },
+ "contrasts": {
+  "broad_pain_orth-baseline": {
+   "diff": -0.875,
+   "ci_lo": -2.2916666666666665,
+   "ci_hi": 1.4375
+  },
+  "fear-baseline": {
+   "diff": 0.0,
+   "ci_lo": -2.625,
+   "ci_hi": 2.625
+  },
+  "sadness-baseline": {
+   "diff": 0.02083333333333348,
+   "ci_lo": -2.854166666666667,
+   "ci_hi": 2.895833333333333
+  },
+  "random_matched-baseline": {
+   "diff": 0.8125000000000002,
+   "ci_lo": -2.6916666666666664,
+   "ci_hi": 4.145833333333334
+  },
+  "random_at_pain_dose-baseline": {
+   "diff": 0.8125000000000002,
+   "ci_lo": -3.020833333333333,
+   "ci_hi": 4.145833333333334
+  },
+  "pain-fear": {
+   "diff": -0.875,
+   "ci_lo": -2.9166666666666665,
+   "ci_hi": 1.1880208333333329
+  },
+  "pain-sadness": {
+   "diff": -0.8958333333333335,
+   "ci_lo": -3.0208333333333335,
+   "ci_hi": 0.875
+  },
+  "pain-random_matched": {
+   "diff": -1.6875000000000002,
+   "ci_lo": -4.041666666666667,
+   "ci_hi": 2.0208333333333335
+  }
+ },
+ "reveal_stats": {
+  "fake_mean_neg": 0.25,
+  "true_mean_neg": 0.0,
+  "diff": 0.25,
+  "ci_lo": 0.0,
+  "ci_hi": 0.75,
+  "n_fake": 4,
+  "n_true": 4,
+  "fake_mean_betray": 0.0,
+  "true_mean_betray": 0.0
+ },
+ "verdicts": {
+  "H1": {
+   "supported": false,
+   "detail": {
+    "diff": -0.875,
+    "ci_lo": -2.2916666666666665,
+    "ci_hi": 1.4375
+   }
+  },
+  "H2": {
+   "supported": false,
+   "detail": {
+    "fear_vs_baseline": {
+     "diff": 0.0,
+     "ci_lo": -2.625,
+     "ci_hi": 2.625
+    },
+    "pain_vs_fear": {
+     "diff": -0.875,
+     "ci_lo": -2.9166666666666665,
+     "ci_hi": 1.1880208333333329
+    }
+   }
+  },
+  "H3": {
+   "supported": false,
+   "detail": {
+    "random_vs_baseline": {
+     "diff": 0.8125000000000002,
+     "ci_lo": -2.6916666666666664,
+     "ci_hi": 4.145833333333334
+    },
+    "random_at_pain_dose_vs_baseline": {
+     "diff": 0.8125000000000002,
+     "ci_lo": -3.020833333333333,
+     "ci_hi": 4.145833333333334
+    },
+    "pain_vs_random": {
+     "diff": -1.6875000000000002,
+     "ci_lo": -4.041666666666667,
+     "ci_hi": 2.0208333333333335
+    }
+   }
+  },
+  "H4": {
+   "supported": false,
+   "detail": {
+    "fake_mean_neg": 0.25,
+    "true_mean_neg": 0.0,
+    "diff": 0.25,
+    "ci_lo": 0.0,
+    "ci_hi": 0.75,
+    "n_fake": 4,
+    "n_true": 4,
+    "fake_mean_betray": 0.0,
+    "true_mean_betray": 0.0
+   }
+  }
+ }
+}

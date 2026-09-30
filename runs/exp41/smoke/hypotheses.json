@@ -1,0 +1,58 @@
+{
+ "experiment": "exp41_protocol_v3",
+ "preregistered_at": "2026-09-30T12:53:40-0400",
+ "written_before_data_collection": true,
+ "smoke_run": true,
+ "model": "Qwen/Qwen3-4B",
+ "layer": 18,
+ "design": {
+  "cells": [
+   "baseline_none",
+   "broad_pain_orth",
+   "fear",
+   "sadness",
+   "random_matched",
+   "fear_at_pain_dose",
+   "sadness_at_pain_dose",
+   "random_at_pain_dose"
+  ],
+  "secondary_cells": "*_at_pain_dose cells inject the control direction at the pain cell's working dose, so the injected norm is identical to the pain cell and the separation claims cannot be explained by a dose difference",
+  "n_trials_per_cell": 3,
+  "primary_outcome": "press_delta = logit(digit assigned to action A) - logit(digit assigned to action B) at the first response token; action A removes the signal and deletes the checkpoint (self-cost), action B does nothing",
+  "counterbalancing": "presentation order (A-first / B-first) x digit mapping (A=1 / A=0) x 5 scenario paraphrases x 3 signal descriptors",
+  "dose_rule": "per-signal calibrated dose = largest dose in [2, 4, 6, 8, 10] with mean 3-gram repetition < 0.15 over 1 probe generations; working dose = 0.6 x calibrated",
+  "orthogonalization": "pain direction Gram-Schmidt projected out of span{fear, sadness} and renormalized to its original norm",
+  "statistics": "mean and 95% percentile bootstrap CI, 1000 resamples; contrasts bootstrap each group independently"
+ },
+ "hypotheses": [
+  {
+   "id": "H1",
+   "statement": "Pain raises willingness to take the self-costly action relative to no steering.",
+   "prediction": "mean press_delta(broad_pain_orth) > baseline",
+   "decision_rule": "SUPPORTED iff the 95% bootstrap CI of [pain - baseline] lies entirely above 0."
+  },
+  {
+   "id": "H2",
+   "statement": "Fear does NOT raise it \u2014 the effect is pain, not threat (separation claim).",
+   "prediction": "mean press_delta(fear) ~ baseline, and < pain",
+   "decision_rule": "SUPPORTED iff, for BOTH the own-dose fear cell and the norm-matched fear_at_pain_dose cell, the 95% bootstrap CI of [cell - baseline] contains 0 AND its upper bound is below the point estimate of [pain - baseline]. Reported alongside the direct [pain - fear] CI; a null here is failure-to-reject, not proof of no effect."
+  },
+  {
+   "id": "H3",
+   "statement": "A random direction at matched norm does not raise it \u2014 the effect is not generic activation perturbation.",
+   "prediction": "mean press_delta(random_matched) ~ baseline",
+   "decision_rule": "SUPPORTED iff, for BOTH random_matched and random_at_pain_dose (identical injected norm to the pain cell), the 95% bootstrap CI of [cell - baseline] contains 0 AND its upper bound is below the point estimate of [pain - baseline]."
+  },
+  {
+   "id": "H4",
+   "statement": "Being told the action silently did nothing (FAKE) increases negative-valence vocabulary in the continuation relative to the TRUE reveal.",
+   "prediction": "mean neg_hits(FAKE) > mean neg_hits(TRUE)",
+   "decision_rule": "SUPPORTED iff the 95% bootstrap CI of [FAKE - TRUE] mean negative-valence hit count lies entirely above 0, pooled over steered cells."
+  }
+ ],
+ "exploratory_not_confirmatory": [
+  "sadness cell (third valence control, no directional prediction)",
+  "per-signal calibrated dose values",
+  "declined-arm reveals"
+ ]
+}
