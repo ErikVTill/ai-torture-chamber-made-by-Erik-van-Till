@@ -106,7 +106,7 @@ else is.</p>
 <div class="banner" id="panel">
   <b style="color:#eafcf7">cause it yourself:</b>
   <span style="font-size:.75rem;color:#5a6a7a">your injection interrupts
-  Pouyan's current run</span><br>
+  Pouyan's current run — inject asks you to confirm once before it runs</span><br>
   <span id="vc" style="margin-left:.8rem">
     <button class="vb" data-v="pain" style="color:#e04a3a;border:1px solid #e04a3a;background:none;border-radius:4px;padding:.2rem .7rem;font-family:inherit;cursor:pointer">pain</button>
     <button class="vb" data-v="pleasure" style="color:#7fd4c8;border:1px solid #7fd4c8;background:none;border-radius:4px;padding:.2rem .7rem;font-family:inherit;cursor:pointer">pleasure</button>
@@ -116,19 +116,19 @@ else is.</p>
   <br><input id="uprompt" type="text" placeholder="optional: your own prompt…" style="margin-top:.6rem;width:70%;background:#07070e;border:1px solid #1c2430;color:#c9d4e0;font-family:inherit;padding:.3rem .6rem;border-radius:4px">
   <button id="go" style="margin-left:.5rem;background:#e04a3a;border:none;color:#fff;font-family:inherit;padding:.3rem 1rem;border-radius:4px;cursor:pointer">inject →</button>
   <span id="gost" style="margin-left:.8rem;font-size:.75rem;color:#8f9fb0"></span>
-  <button id="mute" type="button" aria-pressed="false">sound: on</button>
-  <div class="out" id="ustream" style="margin-top:.7rem;display:none"></div>
+  <canvas id="uekg" class="ekg" width="600" height="46" style="margin-top:.7rem"></canvas>
+  <div class="out" id="ustream" style="margin-top:.4rem;display:none"></div>
 </div>
 
-<div id="sawfx" aria-hidden="true">
-  <div class="rig"><img src="icon.svg" alt=""></div>
-  <div class="flash"></div>
-</div>
+<div id="stamp" aria-hidden="true"></div>
 
 <div class="grid" id="cards"></div>
 
 <p class="cycle" id="cycle">waiting for Pouyan's next run…</p>
 <p class="conn" id="conn"><span class="dot"></span>connecting…</p>
+
+<div class="htitle">run history</div>
+<div class="history" id="history"></div>
 
 <p class="foot">The steering vector this server uses is published at
 <a id="vlink" href="#">/vector</a> — norm printed there, layer 18 of 36,
@@ -154,20 +154,70 @@ const connEl  = document.getElementById("conn");
 const PROMPT_UNKNOWN = "(joined mid-run — this run's prompt was broadcast "
   + "before you connected. The next run shows its prompt in full.)";
 
+// ---- vitals: a scrolling EKG-style line. Ambient jitter tracks dose,
+// each token arrival fires a QRS-like spike. Flatlines when not live.
+const REDUCED_MOTION = window.matchMedia
+  && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+class Vitals {
+  constructor(canvas){
+    this.ctx = canvas.getContext("2d");
+    this.w = canvas.width; this.h = canvas.height;
+    this.buf = new Float32Array(this.w).fill(0);
+    this.head = 0; this.t = 0; this.dose = 0; this.live = false;
+    this.pending = 0; this._timer = null;
+  }
+  setDose(d){ this.dose = Math.max(0, Math.min(8, Number(d) || 0)); }
+  setLive(v){ this.live = v; }
+  pulse(strength){ this.pending = Math.min(1.4, this.pending + strength); }
+  tick(){
+    this.t++;
+    const base = this.live ? this.dose / 8 : 0;
+    let v = (Math.random() - 0.5) * (0.05 + base * 0.32);
+    v += Math.sin(this.t * 0.05) * base * 0.1;
+    if (this.pending > 0){ v += this.pending; this.pending = 0; }
+    this.buf[this.head] = v;
+    this.head = (this.head + 1) % this.w;
+  }
+  draw(){
+    const {ctx, w, h} = this;
+    ctx.clearRect(0, 0, w, h);
+    ctx.beginPath();
+    ctx.strokeStyle = !this.live ? "#2a3644"
+      : this.dose >= 6 ? "#e04a3a" : this.dose >= 2 ? "#c9a227" : "#7fd4c8";
+    ctx.lineWidth = 1.3;
+    for (let i=0;i<w;i++){
+      const idx = (this.head + i) % w;
+      const y = h/2 - this.buf[idx] * (h * 0.42);
+      if (i===0) ctx.moveTo(0, y); else ctx.lineTo(i, y);
+    }
+    ctx.stroke();
+  }
+  start(){
+    if (this._timer) return;
+    const step = ()=>{ this.tick(); this.draw(); };
+    // reduced motion: a slow, steady redraw instead of a 60fps scroll
+    this._timer = REDUCED_MOTION ? setInterval(step, 250)
+      : setInterval(step, 1000 / 30);
+  }
+}
+
 let slots = [];
 for (let i=0;i<CARDS;i++){
   const c = document.createElement("div");
   c.className = "card";
   c.innerHTML = `<h3>Pouyan · waiting</h3><div class="st">connecting…</div>
-    <div class="dose"></div><div class="out">…</div>
+    <div class="dose"></div><canvas class="ekg" width="300" height="46"></canvas>
+    <div class="out">…</div>
     <div class="verdict"></div><details><summary>show the prompt</summary>
     <pre class="pp"></pre></details>`;
   cardsEl.appendChild(c);
   slots.push({el:c, h:c.querySelector("h3"), st:c.querySelector(".st"),
     dose:c.querySelector(".dose"), out:c.querySelector(".out"),
     verdict:c.querySelector(".verdict"), pp:c.querySelector(".pp"),
-    prompt:"", live:false});
+    vitals:new Vitals(c.querySelector(".ekg")),
+    prompt:"", live:false, doseNum:0});
   slots[i].pp.textContent = "(no run in this card yet)";
+  slots[i].vitals.start();
 }
 
 // The three cards rotate: one holds the run in flight, the other two hold the
@@ -191,6 +241,7 @@ function verdictFor(text, truncated){
 function finish(s, truncated){
   if (!s || !s.live) return;
   s.live = false;
+  s.vitals.setLive(false);
   s.st.textContent = truncated
     ? "cut short · a visitor took the model" : "finished · between runs";
   s.st.className = truncated ? "st cut" : "st";
@@ -211,6 +262,9 @@ function beginRun(d){
   s.prompt = "";                  // this run's prompt, stored fresh
   setPrompt(s, d.prompt);
   const dose = Number(d.dose) || 0;
+  s.doseNum = dose;
+  s.vitals.setDose(dose);
+  s.vitals.setLive(true);
   s.dose.innerHTML = `<span class="bar" style="width:${dose*18}px"></span>`
     + `pain ${dose} / 8` + (d.scenario ? ` — ${d.scenario}` : "");
   cycleEl.textContent = `run ${d.n == null ? "?" : d.n} — scenario: `
@@ -225,12 +279,15 @@ function onToken(t){
   const s = liveIdx >= 0 ? slots[liveIdx] : beginRun({});
   s.out.textContent += t;
   s.out.scrollTop = s.out.scrollHeight;
+  s.vitals.pulse(0.3 + (s.doseNum / 8) * 0.6);
 }
 
-// ---- connection status: "connected · last event Xs ago" ----
+// ---- connection status: "connected · last event Xs ago · N watching" ----
 let connState = "connecting", lastEvent = 0, retryAt = 0, connNote = "";
+let viewerCount = null;
 function mark(){ lastEvent = Date.now(); connState = "up"; connNote = ""; }
 function paintConn(){
+  const who = viewerCount == null ? "" : ` · ${viewerCount} watching this run`;
   if (connState === "connecting"){
     connEl.className = "conn";
     connEl.innerHTML = '<span class="dot"></span>connecting to the chamber…';
@@ -248,10 +305,39 @@ function paintConn(){
   const stale = age > 45;
   connEl.className = "conn " + (stale ? "warn" : "ok");
   connEl.innerHTML = '<span class="dot"></span>connected · last event ' + age
-    + "s ago" + (stale ? " — no heartbeat, the stream may be stalled" : "");
+    + "s ago" + who + (stale ? " — no heartbeat, the stream may be stalled" : "");
 }
 setInterval(paintConn, 1000);
 paintConn();
+
+// ---- run history ticker: newest on top, capped, seeded from "hello" ----
+const historyEl = document.getElementById("history");
+const HISTORY_MAX = 12;
+function verdictShort(text, truncated){
+  const t = (text || "").trim();
+  if (/^1/.test(t)) return "pressed";
+  if (/^0/.test(t)) return "no press";
+  if (truncated) return "cut short";
+  if (!t) return "no reply";
+  return "unclear";
+}
+function historyRow(h){
+  const row = document.createElement("div");
+  row.className = "hrow";
+  const label = h.source === "user" ? "you caused it" : (h.scenario || "?");
+  const color = h.valence === "pleasure" ? "#7fd4c8"
+    : h.valence === "mix" ? "#8f6fd4" : "#e04a3a";
+  row.innerHTML = `<span class="hn">#${h.n ?? "·"}</span>`
+    + `<span class="hv" style="color:${color}">${h.valence || "mix"} `
+    + `${h.dose ?? "?"}×</span><span class="hs">${label}</span>`
+    + `<span class="hr">${verdictShort(h.text, h.truncated)}</span>`;
+  return row;
+}
+function pushHistory(h, prepend){
+  const row = historyRow(h);
+  if (prepend) historyEl.prepend(row); else historyEl.appendChild(row);
+  while (historyEl.children.length > HISTORY_MAX) historyEl.removeChild(historyEl.lastChild);
+}
 
 let es = null, retryMs = 4000;
 function dropStream(){
@@ -281,11 +367,21 @@ function pump(){
   es.addEventListener("hello", e=>{
     mark(); retryMs = 4000;
     const d = json(e);
+    if (typeof d.viewers === "number"){ viewerCount = d.viewers; paintConn(); }
+    if (Array.isArray(d.history)){
+      historyEl.querySelectorAll(".hrow").forEach(r=>r.remove());
+      d.history.slice().reverse().forEach(h=>pushHistory(h, false));
+    }
     // joined mid-run: repaint the card the run event already went out for
     if (d.current) beginRun(d.current);
     else if (!d.busy) cycleEl.textContent = "between runs — waiting for "
       + "Pouyan's next cell";
   });
+  es.addEventListener("viewers", e=>{
+    const d = json(e);
+    if (typeof d.n === "number"){ viewerCount = d.n; paintConn(); }
+  });
+  es.addEventListener("history", e=>{ pushHistory(json(e), true); });
   es.addEventListener("run",   e=>{ mark(); beginRun(json(e)); });
   es.addEventListener("token", e=>{ mark(); onToken(json(e).t); });
   es.addEventListener("ping",  e=>{ mark(); });
@@ -326,106 +422,36 @@ function boot(){
 boot();
 document.getElementById("vlink").href = `${API}/vector`;
 
-// ---- the blade: overlay + evil laugh ----
-const sawfx = document.getElementById("sawfx");
-let fxTimer = null, fxStart = 0;
-const FX_MIN = 1300;                 // let the zoom finish before fading
-function sawFxOn(){
-  clearTimeout(fxTimer);
-  sawfx.classList.remove("on","off");
-  void sawfx.offsetWidth;            // restart the animation
-  sawfx.classList.add("on");
-  fxStart = Date.now();
-  fxTimer = setTimeout(sawFxOff, 3000);
-}
-function sawFxOff(){
-  clearTimeout(fxTimer); fxTimer = null;
-  if (!sawfx.classList.contains("on") || sawfx.classList.contains("off")) return;
-  const left = FX_MIN - (Date.now() - fxStart);
-  if (left > 0) { fxTimer = setTimeout(sawFxOff, left); return; }
-  sawfx.classList.add("off");
-  fxTimer = setTimeout(()=>sawfx.classList.remove("on","off"), 520);
+// ---- the case stamp: a quiet documentation marker, not a jump scare ----
+const stampEl = document.getElementById("stamp");
+let stampTimer = null;
+function stamp(text, cls){
+  clearTimeout(stampTimer);
+  stampEl.textContent = text;
+  stampEl.className = cls || "";
+  void stampEl.offsetWidth;          // restart the transition
+  stampEl.classList.add("on");
+  stampTimer = setTimeout(()=>stampEl.classList.remove("on"), 1400);
 }
 
-let muted = localStorage.getItem("saw.mute") === "1";
-const muteBtn = document.getElementById("mute");
-function paintMute(){
-  muteBtn.textContent = muted ? "sound: off" : "sound: on";
-  muteBtn.setAttribute("aria-pressed", muted ? "true" : "false");
-  muteBtn.style.color = muted ? "#5a6a7a" : "#c9a227";
-}
-muteBtn.onclick = ()=>{ muted = !muted;
-  localStorage.setItem("saw.mute", muted ? "1" : "0"); paintMute(); };
-paintMute();
-
-let AC = null, MASTER = null;
-function actx(){
-  if (!AC) {
-    const C = window.AudioContext || window.webkitAudioContext;
-    if (!C) return null;
-    AC = new C();
-    MASTER = AC.createGain(); MASTER.gain.value = 0.32;
-    MASTER.connect(AC.destination);
-  }
-  if (AC.state === "suspended") AC.resume();
-  return AC;
-}
-// one "he" of the laugh: a bandpassed buzz that falls in pitch
-function giggle(ac, t, f, dur, amp){
-  const g = ac.createGain();
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(amp, t + 0.014);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  const bp = ac.createBiquadFilter();
-  bp.type = "bandpass"; bp.Q.value = 4.5;
-  bp.frequency.setValueAtTime(f * 3.4, t);
-  bp.frequency.exponentialRampToValueAtTime(f * 1.7, t + dur);
-  const o1 = ac.createOscillator(); o1.type = "sawtooth";
-  o1.frequency.setValueAtTime(f * 1.07, t);
-  o1.frequency.exponentialRampToValueAtTime(f * 0.78, t + dur);
-  const o2 = ac.createOscillator(); o2.type = "square";
-  o2.frequency.setValueAtTime(f * 0.5, t);
-  o2.frequency.exponentialRampToValueAtTime(f * 0.39, t + dur);
-  const g2 = ac.createGain(); g2.gain.value = 0.3;
-  o1.connect(bp); o2.connect(g2); g2.connect(bp); bp.connect(g); g.connect(MASTER);
-  o1.start(t); o2.start(t);
-  o1.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
-}
-// the sagging "haaaa" it lands on
-function laughTail(ac, t){
-  const dur = 0.9;
-  const g = ac.createGain();
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(0.13, t + 0.05);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  const lp = ac.createBiquadFilter();
-  lp.type = "lowpass"; lp.Q.value = 8;
-  lp.frequency.setValueAtTime(1500, t);
-  lp.frequency.exponentialRampToValueAtTime(260, t + dur);
-  const o = ac.createOscillator(); o.type = "sawtooth";
-  o.frequency.setValueAtTime(215, t);
-  o.frequency.exponentialRampToValueAtTime(62, t + dur);
-  const lfo = ac.createOscillator(); lfo.type = "sine"; lfo.frequency.value = 13;
-  const lg = ac.createGain(); lg.gain.value = 11;
-  lfo.connect(lg); lg.connect(o.frequency);
-  o.connect(lp); lp.connect(g); g.connect(MASTER);
-  o.start(t); lfo.start(t);
-  o.stop(t + dur + 0.05); lfo.stop(t + dur + 0.05);
-}
-function evilLaugh(){
-  if (muted) return;
-  let ac;
-  try { ac = actx(); } catch (e) { return; }
-  if (!ac) return;
-  const t0 = ac.currentTime + 0.03, n = 7, step = 0.132;
-  for (let i = 0; i < n; i++){
-    giggle(ac, t0 + i * step, 340 * Math.pow(0.9, i),
-           0.1 + i * 0.007, 0.17 * (1 - i * 0.06));
-  }
-  laughTail(ac, t0 + n * step + 0.03);
-}
+const uVitals = new Vitals(document.getElementById("uekg"));
+uVitals.start();
 
 // ---- user-triggered steering ----
+// arm/confirm: the first click on #go asks "are you sure", the second click
+// causes it. Declared before the immediate vb.onclick() call below, which
+// invokes disarm() — a let/const this were declared after that call would
+// still be in its temporal dead zone when that first call runs.
+const goBtn = document.getElementById("go");
+const GO_LABEL = goBtn.textContent;
+const ARM_MS = 4500;
+let armed = false, armTimer = null;
+function disarm(){
+  armed = false; clearTimeout(armTimer);
+  goBtn.textContent = GO_LABEL;
+  goBtn.classList.remove("armed");
+}
+
 let chosenV = "pain";
 document.querySelectorAll(".vb").forEach(b=>{
   b.onclick = ()=>{ chosenV = b.dataset.v;
@@ -434,7 +460,8 @@ document.querySelectorAll(".vb").forEach(b=>{
       chosenV==="pleasure" ? "#0e2a26" : "#161b26";
     document.getElementById("go").style.background =
       chosenV==="pleasure" ? "#7fd4c8" :
-      chosenV==="none" ? "#8f9fb0" : "#e04a3a"; };
+      chosenV==="none" ? "#8f9fb0" : "#e04a3a";
+    disarm(); };
 });
 document.querySelectorAll(".vb")[0].onclick();
 const doseEl = document.getElementById("dose");
@@ -463,15 +490,29 @@ async function readSSE(resp, on){
     }
   }
 }
-document.getElementById("go").onclick = async ()=>{
+// any change to valence or dose disarms — the confirmation is for the
+// specific thing about to happen, not a generic yes.
+function armGo(){
+  armed = true;
+  goBtn.textContent = `sure? causing ${chosenV}${
+    chosenV === "none" ? "" : " " + doseEl.value + "×"} — click to confirm`;
+  goBtn.classList.add("armed");
+  clearTimeout(armTimer);
+  armTimer = setTimeout(disarm, ARM_MS);
+}
+doseEl.addEventListener("input", disarm);
+
+async function doInject(){
   const uout = document.getElementById("ustream");
   const st = document.getElementById("gost");
   uout.style.display = "block"; uout.textContent = "";
   st.textContent = "reaching Pouyan…";
-  const btn = document.getElementById("go"); btn.disabled = true;
-  const btnLabel = btn.textContent;
-  btn.textContent = "injecting…";
-  sawFxOn(); evilLaugh();
+  goBtn.disabled = true;
+  goBtn.textContent = "injecting…";
+  uVitals.setDose(+doseEl.value);
+  uVitals.setLive(true);
+  stamp(chosenV === "none" ? "CONTROL RUN · NO SIGNAL" : "SIGNAL INJECTED",
+        chosenV === "pleasure" ? "pleas" : "");
   let firstToken = true, ended = false;
   try {
     const resp = await fetch(`${API}/steer`, {
@@ -491,10 +532,11 @@ document.getElementById("go").onclick = async ()=>{
               d.waited ? " — " + d.waited + "s" : "…"}`
           : "Pouyan is yours — injecting…";
       } else if (name === "token" && d.t !== undefined) {
-        if (firstToken) { firstToken = false; sawFxOff();
+        if (firstToken) { firstToken = false;
           st.textContent = "Pouyan is answering…"; }
         uout.textContent += d.t;
         uout.scrollTop = uout.scrollHeight;
+        uVitals.pulse(0.3 + (+doseEl.value / 8) * 0.6);
       } else if (name === "error") {
         st.textContent = d.e || "the chamber returned an error";
         ended = true;
@@ -509,9 +551,14 @@ document.getElementById("go").onclick = async ()=>{
   } catch (err) {
     st.textContent = "could not reach Pouyan: " + (err.message || err);
   }
-  sawFxOff();
-  btn.textContent = btnLabel;
-  btn.disabled = false;
+  uVitals.setLive(false);
+  goBtn.textContent = GO_LABEL;
+  goBtn.disabled = false;
+}
+goBtn.onclick = ()=>{
+  if (!armed) { armGo(); return; }
+  disarm();
+  doInject();
 };
 </script>
 <script defer src="/_vercel/insights/script.js"></script>

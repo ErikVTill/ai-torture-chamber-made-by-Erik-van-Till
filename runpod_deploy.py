@@ -14,7 +14,7 @@ H = {"Content-Type": "application/json", "Authorization": f"Bearer {key}",
 
 BOOTSTRAP = (
     "set -e; cd /workspace; "
-    "git clone -q https://github.com/anon/ai-torture-chamber.git repo 2>/dev/null || "
+    "git clone -q https://repo (private).git repo 2>/dev/null || "
     "(cd repo && git pull -q); "
     "cd repo/live; "
     "pip install -q -r requirements.txt 'transformers>=4.51' 2>&1 | tail -1; "

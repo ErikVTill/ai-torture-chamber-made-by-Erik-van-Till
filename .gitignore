@@ -1,2 +1,4 @@
 __pycache__/
 .env
+SESSION_RESUME.md
+docs/reddit_post.md
