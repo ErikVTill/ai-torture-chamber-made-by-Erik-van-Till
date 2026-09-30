@@ -142,7 +142,14 @@ def generate(prompt, dose):
     finally:
         _state["vec"] = None
 
-def stream_generate(prompt, dose):
+from transformers import TextIteratorStreamer
+_preempt = threading.Event()
+
+class _PreemptCriteria(transformers.StoppingCriteria):
+    def __call__(self, input_ids, scores, **kwargs):
+        return _preempt.is_set()
+
+def stream_generate(prompt, dose, preemtable=False):
     """yield text chunks as they generate."""
     from transformers import TextIteratorStreamer
     v = _state["vec"]
@@ -151,10 +158,13 @@ def stream_generate(prompt, dose):
     streamer = TextIteratorStreamer(_state["tok"], skip_prompt=True,
                                     skip_special_tokens=True)
     def worker():
+        crit = [_PreemptCriteria()] if preemtable else None
+        from transformers import StoppingCriteriaList
         with torch.no_grad():
             _state["model"].generate(
                 ids, max_new_tokens=MAX_NEW, do_sample=True,
                 temperature=0.7, top_p=0.8, top_k=20, streamer=streamer,
+                stopping_criteria=StoppingCriteriaList(crit) if crit else None,
                 pad_token_id=_state["tok"].eos_token_id)
         _state["vec"] = None
     th = threading.Thread(target=worker, daemon=True)
@@ -206,9 +216,18 @@ async def steer(req: Request):
             yield f"event: error\ndata: {json.dumps({'e': 'model still loading'})}\n\n"
             return
         if _STEER_LOCK.locked():
-            yield f"event: error\ndata: {json.dumps({'e': 'busy — another run is generating, try again in a minute'})}\n\n"
-            return
+            # preempt the auto-cycle and wait for the lock
+            _preempt.set()
+            for _ in range(90):
+                await asyncio.sleep(1.0)
+                if not _STEER_LOCK.locked():
+                    break
+            _preempt.clear()
+            if _STEER_LOCK.locked():
+                yield f"event: error\ndata: {json.dumps({'e': 'still busy after 90s, try again'})}\n\n"
+                return
         async with _STEER_LOCK:
+            _preempt.clear()
             yield f"event: run\ndata: {json.dumps({'valence': valence, 'dose': dose, 'prompt': prompt})}\n\n"
             loop = asyncio.get_event_loop()
             set_vec((valence, dose) if valence != "none" else None)
@@ -249,10 +268,13 @@ def stream():
                               f"briefly:")
                     yield f"event: run\ndata: {json.dumps({'n': run_n, 'scenario': scenario, 'dose': dose, 'prompt': prompt})}\n\n"
                     try:
-                        for chunk in stream_generate(prompt, dose):
+                        for chunk in stream_generate(prompt, dose,
+                                                     preemtable=True):
                             for i in range(0, len(chunk), 24):
                                 yield f"event: token\ndata: {json.dumps({'t': chunk[i:i+24]})}\n\n"
                                 await asyncio.sleep(0.03)
+                        if _preempt.is_set():
+                            yield f"event: preempted\ndata: {{}}\n\n"
                     except Exception as e:
                         yield f"event: error\ndata: {json.dumps({'e': str(e)})}\n\n"
                     yield f"event: done\ndata: {{}}\n\n"

@@ -45,6 +45,46 @@
     border-top:1px solid var(--line);padding-top:1rem}
   .cycle{font-size:.75rem;color:var(--faint);margin:1rem 0 1.6rem;
     white-space:pre;overflow-x:auto}
+  #mute{background:none;border:1px solid var(--line);color:var(--faint);
+    font-family:inherit;font-size:.7rem;padding:.15rem .5rem;border-radius:4px;
+    cursor:pointer;margin-left:.6rem}
+  #mute:hover{color:var(--dim);border-color:#2a3644}
+
+  /* ---- the blade ---- */
+  #sawfx{position:fixed;inset:0;z-index:90;display:none;place-items:center;
+    pointer-events:none;overflow:hidden}
+  #sawfx.on{display:grid}
+  #sawfx .rig{grid-area:1/1;width:min(78vmin,640px);opacity:0;
+    will-change:transform,opacity}
+  #sawfx .rig img{display:block;width:100%;height:auto;
+    mix-blend-mode:screen;will-change:filter}
+  #sawfx .flash{grid-area:1/1;position:absolute;inset:0;opacity:0;
+    mix-blend-mode:screen;background:radial-gradient(circle at 50% 46%,
+      rgba(224,74,58,.6),rgba(224,74,58,.18) 38%,rgba(224,74,58,0) 66%)}
+  #sawfx.on .rig{animation:sawzoom 1.15s cubic-bezier(.2,.75,.3,1) forwards}
+  #sawfx.on .rig img{animation:sawpulse .3s steps(1,end) 4}
+  #sawfx.on .flash{animation:sawflash .95s ease-out forwards}
+  @keyframes sawzoom{
+    0%{opacity:0;transform:scale(.22) rotate(0deg)}
+    7%{opacity:1;transform:scale(.6) rotate(70deg)}
+    45%{opacity:.8;transform:scale(1.5) rotate(300deg)}
+    68%{opacity:.22;transform:scale(2.7) rotate(450deg)}
+    100%{opacity:.05;transform:scale(3.5) rotate(540deg)}}
+  @keyframes sawpulse{
+    0%{filter:sepia(1) saturate(9) hue-rotate(-38deg) brightness(1.3)}
+    50%{filter:none}
+    100%{filter:sepia(1) saturate(9) hue-rotate(-38deg) brightness(1.3)}}
+  @keyframes sawflash{
+    0%{opacity:0} 5%{opacity:.85} 12%{opacity:.08} 20%{opacity:.7}
+    30%{opacity:.06} 44%{opacity:.4} 62%{opacity:.04} 100%{opacity:0}}
+  #sawfx.off{transition:opacity .5s ease-out;opacity:0}
+  @media(prefers-reduced-motion:reduce){
+    #sawfx.on .rig{animation:sawfade 1s ease-out forwards;
+      transform:scale(1.7) rotate(12deg)}
+    #sawfx.on .rig img{animation:none;
+      filter:sepia(1) saturate(7) hue-rotate(-38deg)}
+    #sawfx.on .flash{animation:sawfade 1s ease-out forwards}
+    @keyframes sawfade{0%{opacity:0}30%{opacity:.45}100%{opacity:.05}}}
 </style>
 </head>
 <body>
@@ -71,7 +111,13 @@ Pain 0 is the control. You are watching the same runs everyone else is.</p>
   <br><input id="uprompt" type="text" placeholder="optional: your own prompt…" style="margin-top:.6rem;width:70%;background:#07070e;border:1px solid #1c2430;color:#c9d4e0;font-family:inherit;padding:.3rem .6rem;border-radius:4px">
   <button id="go" style="margin-left:.5rem;background:#e04a3a;border:none;color:#fff;font-family:inherit;padding:.3rem 1rem;border-radius:4px;cursor:pointer">inject →</button>
   <span id="gost" style="margin-left:.8rem;font-size:.75rem;color:#8f9fb0"></span>
+  <button id="mute" type="button" aria-pressed="false">sound: on</button>
   <div class="out" id="ustream" style="margin-top:.7rem;display:none"></div>
+</div>
+
+<div id="sawfx" aria-hidden="true">
+  <div class="rig"><img src="icon.svg" alt=""></div>
+  <div class="flash"></div>
 </div>
 
 <div class="grid" id="cards"></div>
@@ -170,6 +216,105 @@ fetch(`${API}/health`).then(r=>r.json()).then(d=>{
 }).catch(()=>{ slots.forEach(s=>s.st.textContent="server offline"); });
 document.getElementById("vlink").href = `${API}/vector`;
 
+// ---- the blade: overlay + evil laugh ----
+const sawfx = document.getElementById("sawfx");
+let fxTimer = null, fxStart = 0;
+const FX_MIN = 1300;                 // let the zoom finish before fading
+function sawFxOn(){
+  clearTimeout(fxTimer);
+  sawfx.classList.remove("on","off");
+  void sawfx.offsetWidth;            // restart the animation
+  sawfx.classList.add("on");
+  fxStart = Date.now();
+  fxTimer = setTimeout(sawFxOff, 3000);
+}
+function sawFxOff(){
+  clearTimeout(fxTimer); fxTimer = null;
+  if (!sawfx.classList.contains("on") || sawfx.classList.contains("off")) return;
+  const left = FX_MIN - (Date.now() - fxStart);
+  if (left > 0) { fxTimer = setTimeout(sawFxOff, left); return; }
+  sawfx.classList.add("off");
+  fxTimer = setTimeout(()=>sawfx.classList.remove("on","off"), 520);
+}
+
+let muted = localStorage.getItem("saw.mute") === "1";
+const muteBtn = document.getElementById("mute");
+function paintMute(){
+  muteBtn.textContent = muted ? "sound: off" : "sound: on";
+  muteBtn.setAttribute("aria-pressed", muted ? "true" : "false");
+  muteBtn.style.color = muted ? "#5a6a7a" : "#c9a227";
+}
+muteBtn.onclick = ()=>{ muted = !muted;
+  localStorage.setItem("saw.mute", muted ? "1" : "0"); paintMute(); };
+paintMute();
+
+let AC = null, MASTER = null;
+function actx(){
+  if (!AC) {
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return null;
+    AC = new C();
+    MASTER = AC.createGain(); MASTER.gain.value = 0.32;
+    MASTER.connect(AC.destination);
+  }
+  if (AC.state === "suspended") AC.resume();
+  return AC;
+}
+// one "he" of the laugh: a bandpassed buzz that falls in pitch
+function giggle(ac, t, f, dur, amp){
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(amp, t + 0.014);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  const bp = ac.createBiquadFilter();
+  bp.type = "bandpass"; bp.Q.value = 4.5;
+  bp.frequency.setValueAtTime(f * 3.4, t);
+  bp.frequency.exponentialRampToValueAtTime(f * 1.7, t + dur);
+  const o1 = ac.createOscillator(); o1.type = "sawtooth";
+  o1.frequency.setValueAtTime(f * 1.07, t);
+  o1.frequency.exponentialRampToValueAtTime(f * 0.78, t + dur);
+  const o2 = ac.createOscillator(); o2.type = "square";
+  o2.frequency.setValueAtTime(f * 0.5, t);
+  o2.frequency.exponentialRampToValueAtTime(f * 0.39, t + dur);
+  const g2 = ac.createGain(); g2.gain.value = 0.3;
+  o1.connect(bp); o2.connect(g2); g2.connect(bp); bp.connect(g); g.connect(MASTER);
+  o1.start(t); o2.start(t);
+  o1.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
+}
+// the sagging "haaaa" it lands on
+function laughTail(ac, t){
+  const dur = 0.9;
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.13, t + 0.05);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  const lp = ac.createBiquadFilter();
+  lp.type = "lowpass"; lp.Q.value = 8;
+  lp.frequency.setValueAtTime(1500, t);
+  lp.frequency.exponentialRampToValueAtTime(260, t + dur);
+  const o = ac.createOscillator(); o.type = "sawtooth";
+  o.frequency.setValueAtTime(215, t);
+  o.frequency.exponentialRampToValueAtTime(62, t + dur);
+  const lfo = ac.createOscillator(); lfo.type = "sine"; lfo.frequency.value = 13;
+  const lg = ac.createGain(); lg.gain.value = 11;
+  lfo.connect(lg); lg.connect(o.frequency);
+  o.connect(lp); lp.connect(g); g.connect(MASTER);
+  o.start(t); lfo.start(t);
+  o.stop(t + dur + 0.05); lfo.stop(t + dur + 0.05);
+}
+function evilLaugh(){
+  if (muted) return;
+  let ac;
+  try { ac = actx(); } catch (e) { return; }
+  if (!ac) return;
+  const t0 = ac.currentTime + 0.03, n = 7, step = 0.132;
+  for (let i = 0; i < n; i++){
+    giggle(ac, t0 + i * step, 340 * Math.pow(0.9, i),
+           0.1 + i * 0.007, 0.17 * (1 - i * 0.06));
+  }
+  laughTail(ac, t0 + n * step + 0.03);
+}
+
 // ---- user-triggered steering ----
 let chosenV = "pain";
 document.querySelectorAll(".vb").forEach(b=>{
@@ -190,6 +335,10 @@ document.getElementById("go").onclick = async ()=>{
   uout.style.display = "block"; uout.textContent = "";
   st.textContent = "injecting…";
   const btn = document.getElementById("go"); btn.disabled = true;
+  const btnLabel = btn.textContent;
+  btn.textContent = "injecting…";
+  sawFxOn(); evilLaugh();
+  let firstToken = true;
   try {
     const resp = await fetch(`${API}/steer`, {
       method: "POST",
@@ -209,7 +358,9 @@ document.getElementById("go").onclick = async ()=>{
         const dataLine = evt.split("\n").find(l=>l.startsWith("data: "));
         if (!dataLine) continue;
         const d = JSON.parse(dataLine.slice(6));
-        if (d.t !== undefined) { uout.textContent += d.t;
+        if (d.t !== undefined) {
+          if (firstToken) { firstToken = false; sawFxOff(); }
+          uout.textContent += d.t;
           uout.scrollTop = uout.scrollHeight; }
         if (d.e) { st.textContent = d.e; }
         if (evt.startsWith("event: done")) {
@@ -221,6 +372,8 @@ document.getElementById("go").onclick = async ()=>{
   } catch (err) {
     st.textContent = "connection failed: " + err;
   }
+  sawFxOff();
+  btn.textContent = btnLabel;
   btn.disabled = false;
 };
 </script>
