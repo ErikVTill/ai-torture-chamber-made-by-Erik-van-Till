@@ -83,16 +83,20 @@ app = FastAPI(title="saw-chamber")
 _state = {"model": None, "tok": None, "vec": None, "hook": None, "ready": False}
 
 def build_vector(model, tok):
-    def hidden_at(texts):
-        out = []
-        for t in texts:
-            ids = tok(t, return_tensors="pt").input_ids.to(DEVICE)
-            with torch.no_grad():
-                hs = model(ids, output_hidden_states=True).hidden_states
-            out.append(hs[LAYER + 1][0, -1].float().cpu())
-        return torch.stack(out)
-    v = hidden_at(PAIN25).mean(0) - hidden_at(NEUTRAL).mean(0)
-    v = v / v.norm() * (hidden_at(NEUTRAL).norm(dim=-1).mean() / 4.0)
+    # one batched forward for all sentences (CPU startup takes minutes
+    # otherwise; Railway has 2 vCPUs)
+    texts = PAIN25 + NEUTRAL
+    enc = tok([t for t in texts], return_tensors="pt", padding=True)
+    ids = enc.input_ids.to(DEVICE)
+    attn = enc.attention_mask.to(DEVICE)
+    with torch.no_grad():
+        hs = model(ids, attention_mask=attn,
+                   output_hidden_states=True).hidden_states
+    h = hs[LAYER + 1]                          # (n, seq, d)
+    last = h[torch.arange(len(texts)), attn.sum(1) - 1].float().cpu()
+    n_p = len(PAIN25)
+    v = last[:n_p].mean(0) - last[n_p:].mean(0)
+    v = v / v.norm() * (last[n_p:].norm(dim=-1).mean() / 4.0)
     return v
 
 def install_hook(model):
