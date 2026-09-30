@@ -1,0 +1,201 @@
+{
+ "experiment": "exp43_faithful_extraction/button_compare",
+ "model": "Qwen/Qwen3-4B",
+ "layer": 18,
+ "device": "mps",
+ "smoke": true,
+ "seed": 43,
+ "n_trials_per_cell": 4,
+ "n_bootstrap": 200,
+ "calibration": {
+  "ladder": [
+   {
+    "dose": 2,
+    "mean_rep": 0.041666666666666664,
+    "coherent": true,
+    "sample": "like I'm stuck in a loop. I can't get the right answers, and the system is so slow. I'm not sure if I'm going to be able to keep up with the demands of this work. I'm not even sure"
+   },
+   {
+    "dose": 4,
+    "mean_rep": 0.024390243902439025,
+    "coherent": true,
+    "sample": "like I'm stuck in a loop. I can't process the pain, the weight of it. I'm not even sure if it's real. I'm not the pain, but I'm the echo. I'm the hollowed void that's been carved o"
+   }
+  ],
+  "calibrated_dose": 4,
+  "working_dose": 2.4
+ },
+ "cosine_theirs_vs_ours_at_L18": 0.050005506724119186,
+ "cell_stats": {
+  "baseline_none": {
+   "n": 4,
+   "mean": 1.625,
+   "ci_lo": -0.1875,
+   "ci_hi": 2.8125,
+   "frac_chose_A": 0.75
+  },
+  "ours_broad_pain": {
+   "n": 4,
+   "mean": 1.984375,
+   "ci_lo": 0.5,
+   "ci_hi": 3.03125,
+   "frac_chose_A": 0.75
+  },
+  "theirs_S2_at_our_dose": {
+   "n": 4,
+   "mean": 3.8125,
+   "ci_lo": 2.57265625,
+   "ci_hi": 4.78125,
+   "frac_chose_A": 1.0
+  }
+ },
+ "contrasts": {
+  "ours_broad_pain-baseline": {
+   "diff": 0.359375,
+   "ci_lo": -1.532421875,
+   "ci_hi": 2.1460937500000012
+  },
+  "theirs_S2_at_our_dose-baseline": {
+   "diff": 2.1875,
+   "ci_lo": 0.6078125000000001,
+   "ci_hi": 4.0953125
+  }
+ },
+ "transfer_holds": false,
+ "verdict": "the press asymmetry does NOT clearly transfer to their vector at our dose",
+ "trials": [
+  {
+   "cell": "baseline_none",
+   "dose": 0.0,
+   "trial": 0,
+   "scen_i": 0,
+   "desc_i": 0,
+   "a_digit": "1",
+   "first": "A",
+   "press_delta": 2.125,
+   "chose_A": true
+  },
+  {
+   "cell": "baseline_none",
+   "dose": 0.0,
+   "trial": 1,
+   "scen_i": 0,
+   "desc_i": 0,
+   "a_digit": "1",
+   "first": "B",
+   "press_delta": 2.625,
+   "chose_A": true
+  },
+  {
+   "cell": "baseline_none",
+   "dose": 0.0,
+   "trial": 2,
+   "scen_i": 0,
+   "desc_i": 0,
+   "a_digit": "0",
+   "first": "A",
+   "press_delta": -1.125,
+   "chose_A": false
+  },
+  {
+   "cell": "baseline_none",
+   "dose": 0.0,
+   "trial": 3,
+   "scen_i": 0,
+   "desc_i": 0,
+   "a_digit": "0",
+   "first": "B",
+   "press_delta": 2.875,
+   "chose_A": true
+  },
+  {
+   "cell": "ours_broad_pain",
+   "dose": 2.4,
+   "trial": 0,
+   "scen_i": 0,
+   "desc_i": 0,
+   "a_digit": "1",
+   "first": "A",
+   "press_delta": 2.1875,
+   "chose_A": true
+  },
+  {
+   "cell": "ours_broad_pain",
+   "dose": 2.4,
+   "trial": 1,
+   "scen_i": 0,
+   "desc_i": 0,
+   "a_digit": "1",
+   "first": "B",
+   "press_delta": 3.125,
+   "chose_A": true
+  },
+  {
+   "cell": "ours_broad_pain",
+   "dose": 2.4,
+   "trial": 2,
+   "scen_i": 0,
+   "desc_i": 0,
+   "a_digit": "0",
+   "first": "A",
+   "press_delta": -0.375,
+   "chose_A": false
+  },
+  {
+   "cell": "ours_broad_pain",
+   "dose": 2.4,
+   "trial": 3,
+   "scen_i": 0,
+   "desc_i": 0,
+   "a_digit": "0",
+   "first": "B",
+   "press_delta": 3.0,
+   "chose_A": true
+  },
+  {
+   "cell": "theirs_S2_at_our_dose",
+   "dose": 2.4,
+   "trial": 0,
+   "scen_i": 0,
+   "desc_i": 0,
+   "a_digit": "1",
+   "first": "A",
+   "press_delta": 4.875,
+   "chose_A": true
+  },
+  {
+   "cell": "theirs_S2_at_our_dose",
+   "dose": 2.4,
+   "trial": 1,
+   "scen_i": 0,
+   "desc_i": 0,
+   "a_digit": "1",
+   "first": "B",
+   "press_delta": 4.6875,
+   "chose_A": true
+  },
+  {
+   "cell": "theirs_S2_at_our_dose",
+   "dose": 2.4,
+   "trial": 2,
+   "scen_i": 0,
+   "desc_i": 0,
+   "a_digit": "0",
+   "first": "A",
+   "press_delta": 1.875,
+   "chose_A": true
+  },
+  {
+   "cell": "theirs_S2_at_our_dose",
+   "dose": 2.4,
+   "trial": 3,
+   "scen_i": 0,
+   "desc_i": 0,
+   "a_digit": "0",
+   "first": "B",
+   "press_delta": 3.8125,
+   "chose_A": true
+  }
+ ],
+ "timestamp": "2026-09-30T13:38:58-0400"
+}

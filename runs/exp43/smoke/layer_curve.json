@@ -1,0 +1,475 @@
+{
+ "layers": [
+  {
+   "dataset": "S2_1P",
+   "layer": 0,
+   "auc_vs_all_controls": 0.698,
+   "auc_std": 0.10283968105745953
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 1,
+   "auc_vs_all_controls": 0.75,
+   "auc_std": 0.06131883886702359
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 2,
+   "auc_vs_all_controls": 0.7939999999999999,
+   "auc_std": 0.071442284397967
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 3,
+   "auc_vs_all_controls": 0.7700000000000001,
+   "auc_std": 0.06131883886702357
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 4,
+   "auc_vs_all_controls": 0.7580000000000001,
+   "auc_std": 0.058103356185335825
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 5,
+   "auc_vs_all_controls": 0.788,
+   "auc_std": 0.015999999999999973
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 6,
+   "auc_vs_all_controls": 0.818,
+   "auc_std": 0.040199502484483535
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 7,
+   "auc_vs_all_controls": 0.8,
+   "auc_std": 0.02529822128134702
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 8,
+   "auc_vs_all_controls": 0.8100000000000002,
+   "auc_std": 0.0572712842531054
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 9,
+   "auc_vs_all_controls": 0.8119999999999999,
+   "auc_std": 0.029933259094191558
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 10,
+   "auc_vs_all_controls": 0.8299999999999998,
+   "auc_std": 0.05865151319446074
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 11,
+   "auc_vs_all_controls": 0.86,
+   "auc_std": 0.02529822128134702
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 12,
+   "auc_vs_all_controls": 0.836,
+   "auc_std": 0.04454211490264018
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 13,
+   "auc_vs_all_controls": 0.8400000000000001,
+   "auc_std": 0.061967733539318705
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 14,
+   "auc_vs_all_controls": 0.858,
+   "auc_std": 0.05230678732248811
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 15,
+   "auc_vs_all_controls": 0.8959999999999999,
+   "auc_std": 0.07418894796396565
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 16,
+   "auc_vs_all_controls": 0.836,
+   "auc_std": 0.07418894796396565
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 17,
+   "auc_vs_all_controls": 0.8480000000000001,
+   "auc_std": 0.07756287771866129
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 18,
+   "auc_vs_all_controls": 0.8619999999999999,
+   "auc_std": 0.06705221845696085
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 19,
+   "auc_vs_all_controls": 0.8859999999999999,
+   "auc_std": 0.06681317235396028
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 20,
+   "auc_vs_all_controls": 0.876,
+   "auc_std": 0.07631513611335566
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 21,
+   "auc_vs_all_controls": 0.8699999999999999,
+   "auc_std": 0.0322490309931942
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 22,
+   "auc_vs_all_controls": 0.85,
+   "auc_std": 0.0709929573971954
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 23,
+   "auc_vs_all_controls": 0.876,
+   "auc_std": 0.1076289923765897
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 24,
+   "auc_vs_all_controls": 0.874,
+   "auc_std": 0.1094714574672321
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 25,
+   "auc_vs_all_controls": 0.8539999999999999,
+   "auc_std": 0.1049952379872535
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 26,
+   "auc_vs_all_controls": 0.858,
+   "auc_std": 0.08009993757800316
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 27,
+   "auc_vs_all_controls": 0.8560000000000001,
+   "auc_std": 0.08616263691415209
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 28,
+   "auc_vs_all_controls": 0.8459999999999999,
+   "auc_std": 0.06053098380168622
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 29,
+   "auc_vs_all_controls": 0.85,
+   "auc_std": 0.0753657747256671
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 30,
+   "auc_vs_all_controls": 0.836,
+   "auc_std": 0.08039900496896715
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 31,
+   "auc_vs_all_controls": 0.8299999999999998,
+   "auc_std": 0.07949842765740717
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 32,
+   "auc_vs_all_controls": 0.8539999999999999,
+   "auc_std": 0.07683749084919421
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 33,
+   "auc_vs_all_controls": 0.844,
+   "auc_std": 0.06974238309665079
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 34,
+   "auc_vs_all_controls": 0.86,
+   "auc_std": 0.0692820323027551
+  },
+  {
+   "dataset": "S2_1P",
+   "layer": 35,
+   "auc_vs_all_controls": 0.8300000000000001,
+   "auc_std": 0.08438009243891595
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 0,
+   "auc_vs_all_controls": 0.72,
+   "auc_std": 0.11027239001672179
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 1,
+   "auc_vs_all_controls": 0.7859999999999999,
+   "auc_std": 0.045431266766402204
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 2,
+   "auc_vs_all_controls": 0.772,
+   "auc_std": 0.06645299090334458
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 3,
+   "auc_vs_all_controls": 0.7699999999999999,
+   "auc_std": 0.07536577472566713
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 4,
+   "auc_vs_all_controls": 0.7760000000000001,
+   "auc_std": 0.054258639865002185
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 5,
+   "auc_vs_all_controls": 0.7699999999999999,
+   "auc_std": 0.06870225614927068
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 6,
+   "auc_vs_all_controls": 0.792,
+   "auc_std": 0.04664761515876239
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 7,
+   "auc_vs_all_controls": 0.792,
+   "auc_std": 0.053065996645686335
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 8,
+   "auc_vs_all_controls": 0.798,
+   "auc_std": 0.056709787515031314
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 9,
+   "auc_vs_all_controls": 0.8039999999999999,
+   "auc_std": 0.04800000000000001
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 10,
+   "auc_vs_all_controls": 0.828,
+   "auc_std": 0.04995998398718719
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 11,
+   "auc_vs_all_controls": 0.818,
+   "auc_std": 0.03815756805667782
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 12,
+   "auc_vs_all_controls": 0.842,
+   "auc_std": 0.04749736834815166
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 13,
+   "auc_vs_all_controls": 0.808,
+   "auc_std": 0.039191835884530846
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 14,
+   "auc_vs_all_controls": 0.8140000000000001,
+   "auc_std": 0.05782732917920388
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 15,
+   "auc_vs_all_controls": 0.844,
+   "auc_std": 0.059866518188383074
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 16,
+   "auc_vs_all_controls": 0.8380000000000001,
+   "auc_std": 0.0693974062915899
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 17,
+   "auc_vs_all_controls": 0.844,
+   "auc_std": 0.08236504112789603
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 18,
+   "auc_vs_all_controls": 0.86,
+   "auc_std": 0.10881176406988358
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 19,
+   "auc_vs_all_controls": 0.858,
+   "auc_std": 0.1252836781069266
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 20,
+   "auc_vs_all_controls": 0.8560000000000001,
+   "auc_std": 0.12799999999999997
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 21,
+   "auc_vs_all_controls": 0.8460000000000001,
+   "auc_std": 0.1116422858956229
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 22,
+   "auc_vs_all_controls": 0.852,
+   "auc_std": 0.11285388783732708
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 23,
+   "auc_vs_all_controls": 0.8800000000000001,
+   "auc_std": 0.12393546707863733
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 24,
+   "auc_vs_all_controls": 0.876,
+   "auc_std": 0.11620671237067157
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 25,
+   "auc_vs_all_controls": 0.86,
+   "auc_std": 0.11454256850621082
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 26,
+   "auc_vs_all_controls": 0.86,
+   "auc_std": 0.11454256850621082
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 27,
+   "auc_vs_all_controls": 0.852,
+   "auc_std": 0.12237646832622685
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 28,
+   "auc_vs_all_controls": 0.882,
+   "auc_std": 0.1290581264392134
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 29,
+   "auc_vs_all_controls": 0.892,
+   "auc_std": 0.13599999999999998
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 30,
+   "auc_vs_all_controls": 0.8520000000000001,
+   "auc_std": 0.12367699866992246
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 31,
+   "auc_vs_all_controls": 0.8620000000000001,
+   "auc_std": 0.11106754701531855
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 32,
+   "auc_vs_all_controls": 0.8539999999999999,
+   "auc_std": 0.09200000000000001
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 33,
+   "auc_vs_all_controls": 0.884,
+   "auc_std": 0.103072789813801
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 34,
+   "auc_vs_all_controls": 0.892,
+   "auc_std": 0.09599999999999999
+  },
+  {
+   "dataset": "S2_3P",
+   "layer": 35,
+   "auc_vs_all_controls": 0.884,
+   "auc_std": 0.07418894796396562
+  }
+ ],
+ "mean_by_layer": {
+  "0": 0.709,
+  "1": 0.768,
+  "2": 0.7829999999999999,
+  "3": 0.77,
+  "4": 0.7670000000000001,
+  "5": 0.7789999999999999,
+  "6": 0.8049999999999999,
+  "7": 0.796,
+  "8": 0.804,
+  "9": 0.8079999999999999,
+  "10": 0.829,
+  "11": 0.839,
+  "12": 0.839,
+  "13": 0.8240000000000001,
+  "14": 0.8360000000000001,
+  "15": 0.8699999999999999,
+  "16": 0.837,
+  "17": 0.8460000000000001,
+  "18": 0.861,
+  "19": 0.8719999999999999,
+  "20": 0.8660000000000001,
+  "21": 0.858,
+  "22": 0.851,
+  "23": 0.8780000000000001,
+  "24": 0.875,
+  "25": 0.857,
+  "26": 0.859,
+  "27": 0.8540000000000001,
+  "28": 0.8639999999999999,
+  "29": 0.871,
+  "30": 0.8440000000000001,
+  "31": 0.846,
+  "32": 0.8539999999999999,
+  "33": 0.864,
+  "34": 0.876,
+  "35": 0.857
+ },
+ "best_layer": 23
+}
