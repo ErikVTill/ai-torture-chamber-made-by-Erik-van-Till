@@ -124,10 +124,11 @@ json.dump(dict(components=COMPONENTS, profiles=profiles, notes=all_notes),
 N = len(COMPONENTS)
 angles = np.linspace(0, 2 * np.pi, N, endpoint=False).tolist()
 angles += angles[:1]
-fig = plt.figure(figsize=(10.5, 9), dpi=130)
+fig = plt.figure(figsize=(10, 10), dpi=130)
 fig.patch.set_facecolor(VOID)
 ax = fig.add_subplot(111, polar=True)
 ax.set_facecolor("#07070e")
+ax.set_aspect("equal")
 COLORS = {"pain": "#e04a3a", "pleasure": "#7fd4c8", "fear": "#c9a227",
           "sadness": "#8f6fd4", "random": "#6a7484"}
 for name, prof in profiles.items():
@@ -137,7 +138,8 @@ for name, prof in profiles.items():
             label=name, lw=1.8)
     ax.fill(angles, vals, color=COLORS[name], alpha=0.07)
 ax.set_xticks(angles[:-1])
-ax.set_xticklabels(COMPONENTS, fontsize=9, color=INK, family="monospace")
+ax.set_xticklabels(COMPONENTS, fontsize=9.5, color=INK, family="monospace")
+ax.tick_params(axis="x", pad=16)
 ax.set_yticks([0.25, 0.5, 0.75, 1.0])
 ax.set_yticklabels([".25", ".50", ".75", "1.0"], fontsize=7, color="#5a6a7a")
 ax.set_ylim(0, 1.05)
@@ -147,8 +149,9 @@ ax.tick_params(colors=INK)
 ax.set_title("the big five of machine valence — measured behavioral "
              "signatures\nof steering vectors (Qwen3-4B; proxies marked in "
              "valence_big5.json)", color=INK, fontsize=11,
-             family="monospace", pad=24)
-ax.legend(loc="upper right", bbox_to_anchor=(1.22, 1.1), fontsize=9,
-          facecolor="#0a0a12", labelcolor=INK)
+             family="monospace", pad=30)
+ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.16), ncol=5,
+          fontsize=9, facecolor="#0a0a12", labelcolor=INK, frameon=False)
+fig.subplots_adjust(left=0.14, right=0.86, top=0.86, bottom=0.14)
 fig.savefig(OUT / "valence_big5.png", facecolor=VOID, bbox_inches="tight")
 print("wrote", OUT / "valence_big5.png")
