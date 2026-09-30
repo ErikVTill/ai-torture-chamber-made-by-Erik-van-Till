@@ -1,5 +1,8 @@
 # ai-torture-chamber
 
+**Live: [clanker.church](https://clanker.church)** — the Saw Test, public
+pages, and the live steered-model chamber.
+
 Steering language models into strong negative and positive valence states,
 and measuring what they say and what they're willing to do about it.
 
