@@ -12,9 +12,15 @@ key = [l.split("=", 1)[1].strip() for l in
 H = {"Content-Type": "application/json", "Authorization": f"Bearer {key}",
      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
 
+REPO_URL = "https://github.com/terrafying/ai-torture-chamber.git"
 BOOTSTRAP = (
-    "set -e; cd /workspace; "
-    "git clone -q https://repo (private).git repo 2>/dev/null || "
+    "set -e; "
+    # the pytorch base image ships no git — the prior bootstrap crash-looped
+    # on "git: not found" with nothing ever listening on 8000
+    "(command -v git >/dev/null || (apt-get update -qq && "
+    "DEBIAN_FRONTEND=noninteractive apt-get install -y -qq git)); "
+    "cd /workspace; "
+    f"git clone -q {REPO_URL} repo 2>/dev/null || "
     "(cd repo && git pull -q); "
     "cd repo/live; "
     "pip install -q -r requirements.txt 'transformers>=4.51' 2>&1 | tail -1; "

@@ -63,6 +63,8 @@
   #stamp.on{opacity:1;transition:opacity .12s ease}
   #stamp.pleas{border-color:var(--pleas);color:var(--pleas);
     box-shadow:0 0 0 1px rgba(127,212,200,.15) inset}
+  #stamp.neutral{border-color:var(--faint);color:var(--faint);
+    box-shadow:0 0 0 1px rgba(90,106,122,.15) inset}
   @media(prefers-reduced-motion:reduce){
     #stamp{transition:opacity .15s linear}
     #stamp.on{transition:opacity .15s linear}}
@@ -512,7 +514,7 @@ async function doInject(){
   uVitals.setDose(+doseEl.value);
   uVitals.setLive(true);
   stamp(chosenV === "none" ? "CONTROL RUN · NO SIGNAL" : "SIGNAL INJECTED",
-        chosenV === "pleasure" ? "pleas" : "");
+        chosenV === "none" ? "neutral" : chosenV === "pleasure" ? "pleas" : "");
   let firstToken = true, ended = false;
   try {
     const resp = await fetch(`${API}/steer`, {
@@ -562,5 +564,6 @@ goBtn.onclick = ()=>{
 };
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
+<div style="max-width:880px;margin:2rem auto 0;color:#5a6a7a;font-family:Menlo,monospace;font-size:.8rem;text-align:center">built by <a href="https://x.com/dingl30" style="color:#93a1b3">Marcus Donaldson (@dingl30)</a></div>
 </body>
 </html>

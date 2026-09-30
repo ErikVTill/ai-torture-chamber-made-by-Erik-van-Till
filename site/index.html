@@ -528,6 +528,7 @@ AXES.forEach((a, i)=>{
     ev.preventDefault();
     W[a.k] = Math.max(0, Math.min(1, +w.toFixed(3)));
     highlightPreset(null);
+    disarmInject();
     paint();
   });
 });
@@ -543,6 +544,7 @@ function drag(i, ev){
   const d = (p.x - CX) * Math.cos(t) + (p.y - CY) * Math.sin(t);
   W[AXES[i].k] = Math.max(0, Math.min(1, (d - R0) / (R1 - R0)));
   highlightPreset(null);   // a manual drag is a custom mix, not a preset
+  disarmInject();
   paint();
 }
 
@@ -613,9 +615,22 @@ function paint(){
     : total >= 1 ? "at the cap; shares set the direction, not the strength"
     : "shares set the direction, total weight sets the dose";
 }
+// arm/confirm state, declared before paint()'s first call below: any change
+// to the mix disarms a pending confirmation, since it's for a specific dose.
+const injectBtn = document.getElementById("minject");
+const INJECT_LABEL = injectBtn.textContent;
+const ARM_MS = 4500;
+let injectArmed = false, injectArmTimer = null;
+function disarmInject(){
+  injectArmed = false; clearTimeout(injectArmTimer);
+  injectBtn.textContent = INJECT_LABEL;
+  injectBtn.classList.remove("armed");
+}
+
 function resetMix(){
   AXES.forEach(a=>{ if (!a.derived) W[a.k] = 0; });
   highlightPreset("control");
+  disarmInject();
   paint();
 }
 document.getElementById("mreset").onclick = resetMix;
@@ -639,6 +654,7 @@ function applyPreset(name){
   if (!p) return;
   AXES.forEach(a=>{ if (!a.derived) W[a.k] = p[a.k] || 0; });
   highlightPreset(name);
+  disarmInject();
   paint();
 }
 document.querySelectorAll(".pchip").forEach(b=>{
@@ -669,18 +685,6 @@ async function readSSE(resp, on){
       if (data !== null) on(name, data);
     }
   }
-}
-// arm/confirm: the first click asks "are you sure", the second causes it.
-// Any change to the mix disarms — the confirmation is for the specific mix
-// about to be injected, not a generic yes.
-const injectBtn = document.getElementById("minject");
-const INJECT_LABEL = injectBtn.textContent;
-const ARM_MS = 4500;
-let injectArmed = false, injectArmTimer = null;
-function disarmInject(){
-  injectArmed = false; clearTimeout(injectArmTimer);
-  injectBtn.textContent = INJECT_LABEL;
-  injectBtn.classList.remove("armed");
 }
 function armInject(){
   injectArmed = true;
@@ -758,5 +762,6 @@ injectBtn.onclick = ()=>{
 };
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
+<div style="max-width:880px;margin:2rem auto 0;color:#5a6a7a;font-family:Menlo,monospace;font-size:.8rem;text-align:center">built by <a href="https://x.com/dingl30" style="color:#93a1b3">Marcus Donaldson (@dingl30)</a></div>
 </body>
 </html>
