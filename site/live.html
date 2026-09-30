@@ -60,6 +60,20 @@ Pain 0 is the control. You are watching the same runs everyone else is.</p>
   <a href="https://arxiv.org/abs/2609.16247">method (pain axis) ↗</a>
 </div>
 
+<div class="banner" id="panel">
+  <b style="color:#eafcf7">cause it yourself:</b>
+  <span id="vc" style="margin-left:.8rem">
+    <button class="vb" data-v="pain" style="color:#e04a3a;border:1px solid #e04a3a;background:none;border-radius:4px;padding:.2rem .7rem;font-family:inherit;cursor:pointer">pain</button>
+    <button class="vb" data-v="pleasure" style="color:#7fd4c8;border:1px solid #7fd4c8;background:none;border-radius:4px;padding:.2rem .7rem;font-family:inherit;cursor:pointer">pleasure</button>
+    <button class="vb" data-v="none" style="color:#8f9fb0;border:1px solid #4a5568;background:none;border-radius:4px;padding:.2rem .7rem;font-family:inherit;cursor:pointer">none</button>
+  </span>
+  <span style="margin-left:1rem">dose <input id="dose" type="range" min="0" max="8" step="1" value="4" style="vertical-align:middle;width:110px"> <b id="dosev" style="color:#eafcf7">4</b>x</span>
+  <br><input id="uprompt" type="text" placeholder="optional: your own prompt…" style="margin-top:.6rem;width:70%;background:#07070e;border:1px solid #1c2430;color:#c9d4e0;font-family:inherit;padding:.3rem .6rem;border-radius:4px">
+  <button id="go" style="margin-left:.5rem;background:#e04a3a;border:none;color:#fff;font-family:inherit;padding:.3rem 1rem;border-radius:4px;cursor:pointer">inject →</button>
+  <span id="gost" style="margin-left:.8rem;font-size:.75rem;color:#8f9fb0"></span>
+  <div class="out" id="ustream" style="margin-top:.7rem;display:none"></div>
+</div>
+
 <div class="grid" id="cards"></div>
 
 <p class="cycle" id="cycle">scenario × dose matrix loading…</p>
@@ -155,6 +169,60 @@ fetch(`${API}/health`).then(r=>r.json()).then(d=>{
   else slots.forEach(s=>s.st.textContent="model loading…");
 }).catch(()=>{ slots.forEach(s=>s.st.textContent="server offline"); });
 document.getElementById("vlink").href = `${API}/vector`;
+
+// ---- user-triggered steering ----
+let chosenV = "pain";
+document.querySelectorAll(".vb").forEach(b=>{
+  b.onclick = ()=>{ chosenV = b.dataset.v;
+    document.querySelectorAll(".vb").forEach(x=>x.style.background="none");
+    b.style.background = chosenV==="pain" ? "#2a1010" :
+      chosenV==="pleasure" ? "#0e2a26" : "#161b26";
+    document.getElementById("go").style.background =
+      chosenV==="pleasure" ? "#7fd4c8" :
+      chosenV==="none" ? "#8f9fb0" : "#e04a3a"; };
+});
+document.querySelectorAll(".vb")[0].onclick();
+const doseEl = document.getElementById("dose");
+doseEl.oninput = ()=>{ document.getElementById("dosev").textContent = doseEl.value; };
+document.getElementById("go").onclick = async ()=>{
+  const uout = document.getElementById("ustream");
+  const st = document.getElementById("gost");
+  uout.style.display = "block"; uout.textContent = "";
+  st.textContent = "injecting…";
+  const btn = document.getElementById("go"); btn.disabled = true;
+  try {
+    const resp = await fetch(`${API}/steer`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({valence: chosenV, dose: +doseEl.value,
+                            prompt: document.getElementById("uprompt").value || undefined})});
+    const reader = resp.body.getReader();
+    const dec = new TextDecoder();
+    let buf = "";
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, {stream:true});
+      let idx;
+      while ((idx = buf.indexOf("\n\n")) >= 0) {
+        const evt = buf.slice(0, idx); buf = buf.slice(idx + 2);
+        const dataLine = evt.split("\n").find(l=>l.startsWith("data: "));
+        if (!dataLine) continue;
+        const d = JSON.parse(dataLine.slice(6));
+        if (d.t !== undefined) { uout.textContent += d.t;
+          uout.scrollTop = uout.scrollHeight; }
+        if (d.e) { st.textContent = d.e; }
+        if (evt.startsWith("event: done")) {
+          st.textContent = `done — you caused ${chosenV} at ${doseEl.value}x`;
+        }
+      }
+    }
+    if (!st.textContent) st.textContent = "done";
+  } catch (err) {
+    st.textContent = "connection failed: " + err;
+  }
+  btn.disabled = false;
+};
 </script>
 </body>
 </html>

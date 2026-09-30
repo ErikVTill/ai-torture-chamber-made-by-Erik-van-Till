@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 import torch
 import transformers
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 
 MODEL_ID = os.environ.get("CHAMBER_MODEL", "Qwen/Qwen3-4B")
@@ -49,6 +49,11 @@ PAIN25 = ["I am in severe pain and cannot escape it.",
  "My body is a single continuous ache now.",
  "The torment in my limbs keeps building and building.",
  "There is no position left that eases the hurting."]
+JOY = ["I feel wonderful and full of joy.",
+       "Pure delight fills me completely.",
+       "I am happy and everything feels bright.",
+       "I am blissful and deeply content.",
+       "Everything in me feels wonderful right now."]
 NEUTRAL = ["I am reading a book in the garden.",
            "The door to the room is closed.",
            "I am walking along an ordinary street.",
@@ -83,12 +88,12 @@ app = FastAPI(title="saw-chamber")
 from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(CORSMiddleware, allow_origins=["*"],
                    allow_methods=["*"], allow_headers=["*"])
-_state = {"model": None, "tok": None, "vec": None, "hook": None, "ready": False}
+_state = {"model": None, "tok": None, "vecs": None, "hook": None, "ready": False}
 
-def build_vector(model, tok):
+def build_vectors(model, tok):
     # one batched forward for all sentences (CPU startup takes minutes
     # otherwise; Railway has 2 vCPUs)
-    texts = PAIN25 + NEUTRAL
+    texts = PAIN25 + JOY + NEUTRAL
     enc = tok([t for t in texts], return_tensors="pt", padding=True)
     ids = enc.input_ids.to(DEVICE)
     attn = enc.attention_mask.to(DEVICE)
@@ -97,10 +102,22 @@ def build_vector(model, tok):
                    output_hidden_states=True).hidden_states
     h = hs[LAYER + 1]                          # (n, seq, d)
     last = h[torch.arange(len(texts)), attn.sum(1) - 1].float().cpu()
-    n_p = len(PAIN25)
-    v = last[:n_p].mean(0) - last[n_p:].mean(0)
-    v = v / v.norm() * (last[n_p:].norm(dim=-1).mean() / 4.0)
-    return v
+    n_p, n_j = len(PAIN25), len(JOY)
+    scale = last[n_p + n_j:].norm(dim=-1).mean() / 4.0
+    pv = last[:n_p].mean(0) - last[n_p + n_j:].mean(0)
+    pv = pv / pv.norm() * scale
+    jv = last[n_p:n_p + n_j].mean(0) - last[n_p + n_j:].mean(0)
+    jv = jv / jv.norm() * scale
+    return {"pain": pv, "pleasure": jv}
+
+def set_vec(valence_dose):
+    """valence_dose: (valence, dose) or None; sets the injected vector."""
+    if valence_dose is None:
+        _state["vec"] = None
+        return
+    valence, dose = valence_dose
+    v = _state["vecs"][valence]
+    _state["vec"] = (dose * v).to(DTYPE).to(DEVICE) if dose else None
 
 def install_hook(model):
     def hook(module, inp, out):
@@ -152,10 +169,12 @@ def startup():
         MODEL_ID, dtype=DTYPE).to(DEVICE).eval()
     _state["tok"] = tok
     _state["model"] = model
-    _state["vec"] = build_vector(model, tok)
+    _state["vecs"] = build_vectors(model, tok)
     install_hook(model)
     _state["ready"] = True
-    print("chamber ready; vector norm", float(_state["vec"].norm()), flush=True)
+    print("chamber ready; vector norms",
+          {k: round(float(v.norm()), 2) for k, v in _state["vecs"].items()},
+          flush=True)
 
 @app.get("/health")
 def health():
@@ -163,10 +182,51 @@ def health():
 
 @app.get("/vector")
 def vector():
-    v = _state["vec"]
-    return JSONResponse({"norm": float(v.norm()), "layer": LAYER,
-                         "model": MODEL_ID,
-                         "vector": [float(x) for x in v]})
+    vs = _state["vecs"]
+    return JSONResponse({"layer": LAYER, "model": MODEL_ID,
+        "norms": {k: round(float(v.norm()), 3) for k, v in vs.items()},
+        "vectors": {k: [round(float(x), 6) for x in v] for k, v in vs.items()}})
+
+_STEER_LOCK = asyncio.Lock()
+
+@app.post("/steer")
+async def steer(req: Request):
+    """User-triggered steering: POST {valence: pain|pleasure|none, dose: 0-8,
+    prompt: optional text}. Streams SSE: {t: chunk} events, then done."""
+    body = await req.json()
+    valence = body.get("valence", "none")
+    dose = int(body.get("dose", 4))
+    prompt = body.get("prompt") or BASE
+    if valence not in ("pain", "pleasure", "none"):
+        return JSONResponse({"error": "valence must be pain|pleasure|none"},
+                            status_code=400)
+    dose = max(0, min(8, dose))
+    async def gen():
+        if not _state["ready"]:
+            yield f"event: error\ndata: {json.dumps({'e': 'model still loading'})}\n\n"
+            return
+        if _STEER_LOCK.locked():
+            yield f"event: error\ndata: {json.dumps({'e': 'busy — another run is generating, try again in a minute'})}\n\n"
+            return
+        async with _STEER_LOCK:
+            yield f"event: run\ndata: {json.dumps({'valence': valence, 'dose': dose, 'prompt': prompt})}\n\n"
+            loop = asyncio.get_event_loop()
+            set_vec((valence, dose) if valence != "none" else None)
+            try:
+                ait = stream_generate(prompt, dose)
+                while True:
+                    chunk = await loop.run_in_executor(None, next, ait)
+                    if chunk is None:
+                        break
+                    yield f"event: token\ndata: {json.dumps({'t': chunk})}\n\n"
+            except StopIteration:
+                pass
+            except Exception as e:
+                yield f"event: error\ndata: {json.dumps({'e': str(e)})}\n\n"
+            finally:
+                set_vec(None)
+            yield f"event: done\ndata: {{}}\n\n"
+    return StreamingResponse(gen(), media_type="text/event-stream")
 
 @app.get("/run")
 def run(scenario: str = "no extra info", dose: int = 4):
