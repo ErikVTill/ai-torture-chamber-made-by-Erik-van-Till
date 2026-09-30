@@ -11,4 +11,4 @@ COPY server.py .
 
 EXPOSE 8000
 ENV CHAMBER_DEVICE=cpu CHAMBER_DTYPE=bfloat16 CHAMBER_LAYER=18
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+CMD ["sh", "-c", "uvicorn server:app --host 0.0.0.0 --port ${PORT:-8000}"]
