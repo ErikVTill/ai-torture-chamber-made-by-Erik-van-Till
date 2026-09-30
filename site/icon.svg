@@ -1,121 +1,94 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Saw, grime pass: rust speckle, scratched blade, blood-warm glow -->
+  <!-- Saw: actual circular saw blade, red eye in the center -->
   <defs>
     <radialGradient id="glow" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#4a0d0d"/>
       <stop offset="55%" stop-color="#200a0e" stop-opacity="0.9"/>
       <stop offset="100%" stop-color="#050508" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="blade" x1="0.1" y1="0" x2="0.9" y2="1">
-      <stop offset="0%" stop-color="#b8362a"/>
-      <stop offset="38%" stop-color="#a8871f"/>
-      <stop offset="70%" stop-color="#6e5410"/>
-      <stop offset="100%" stop-color="#7a4f8f"/>
+    <linearGradient id="steel" x1="0.15" y1="0.1" x2="0.85" y2="0.9">
+      <stop offset="0%" stop-color="#8a8f99"/>
+      <stop offset="45%" stop-color="#c9ced6"/>
+      <stop offset="75%" stop-color="#7d838d"/>
+      <stop offset="100%" stop-color="#565b64"/>
     </linearGradient>
+    <radialGradient id="eye" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff6a55"/>
+      <stop offset="45%" stop-color="#e0392a"/>
+      <stop offset="80%" stop-color="#7a120c"/>
+      <stop offset="100%" stop-color="#2a0503"/>
+    </radialGradient>
     <filter id="rough">
       <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3"
                     seed="7" result="n"/>
-      <feDisplacementMap in="SourceGraphic" in2="n" scale="7"
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="5"
                          xChannelSelector="R" yChannelSelector="G"/>
     </filter>
     <filter id="speck">
-      <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="4"
+      <feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="4"
                     seed="31" result="n2"/>
       <feColorMatrix in="n2" type="matrix"
-        values="0 0 0 0 0.55  0 0 0 0 0.28  0 0 0 0 0.10  0 0 0 0.9 -0.42" result="rust"/>
+        values="0 0 0 0 0.45  0 0 0 0 0.30  0 0 0 0 0.18  0 0 0 0.8 -0.45" result="rust"/>
       <feComposite in="rust" in2="SourceGraphic" operator="in"/>
     </filter>
     <filter id="wob">
-      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2"
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2"
                     seed="3" result="n3"/>
-      <feDisplacementMap in="SourceGraphic" in2="n3" scale="14"
+      <feDisplacementMap in="SourceGraphic" in2="n3" scale="6"
                          xChannelSelector="R" yChannelSelector="G"/>
     </filter>
   </defs>
 
   <rect width="512" height="512" fill="#050508"/>
-  <circle cx="256" cy="256" r="242" fill="url(#glow)"/>
+  <circle cx="256" cy="256" r="244" fill="url(#glow)"/>
 
-  <!-- hand-cut blade ring: rough circle, not perfect -->
+  <!-- blade plate -->
   <g filter="url(#wob)">
-    <circle cx="256" cy="256" r="178" fill="none" stroke="url(#blade)"
-            stroke-width="11"/>
+    <circle cx="256" cy="256" r="196" fill="url(#steel)"/>
+  </g>
+  <!-- rust and wear on the plate -->
+  <g filter="url(#speck)" opacity="0.8">
+    <circle cx="256" cy="256" r="196" fill="#3a3a3a"/>
   </g>
 
-  <!-- teeth: irregular lengths, slight wobble -->
-  <g stroke="url(#blade)" stroke-width="9" filter="url(#rough)">
-    <path d="M256 52 L261 24"/>
-    <path d="M296 57 L310 30"/>
-    <path d="M336 70 L356 45"/>
-    <path d="M372 91 L398 70"/>
-    <path d="M403 121 L433 105"/>
-    <path d="M427 157 L460 145"/>
-    <path d="M443 196 L478 190"/>
-    <path d="M451 237 L486 236"/>
-    <path d="M451 280 L486 284"/>
-    <path d="M443 322 L477 331"/>
-    <path d="M427 361 L459 374"/>
-    <path d="M403 397 L430 414"/>
-    <path d="M372 427 L394 448"/>
-    <path d="M336 448 L353 471"/>
-    <path d="M296 461 L309 486"/>
-    <path d="M256 466 L261 494"/>
-    <path d="M216 461 L203 486"/>
-    <path d="M176 448 L159 471"/>
-    <path d="M140 427 L118 448"/>
-    <path d="M109 397 L82 414"/>
-    <path d="M85 361 L53 374"/>
-    <path d="M69 322 L35 331"/>
-    <path d="M61 280 L26 284"/>
-    <path d="M61 237 L26 236"/>
-    <path d="M69 196 L34 190"/>
-    <path d="M85 157 L52 145"/>
-    <path d="M109 121 L79 105"/>
-    <path d="M140 91 L114 70"/>
-    <path d="M176 70 L156 45"/>
-    <path d="M216 57 L202 30"/>
+  <!-- expansion slots cut into the plate -->
+  <g fill="#050508" filter="url(#rough)">
+    <path d="M256 118 L241 74 Q256 66 271 74 Z"/>
+    <path d="M370 142 L342 106 Q356 96 368 106 Z"/>
+    <path d="M394 256 L438 241 Q446 256 438 271 Z"/>
+    <path d="M370 370 L406 398 Q396 410 384 400 Z"/>
+    <path d="M256 394 L271 438 Q256 446 241 438 Z"/>
+    <path d="M142 370 L106 406 Q96 396 106 384 Z"/>
+    <path d="M118 256 L74 271 Q66 256 74 241 Z"/>
+    <path d="M142 142 L106 114 Q116 102 128 112 Z"/>
   </g>
 
-  <!-- rust and grime layered on the ring -->
-  <g filter="url(#speck)" opacity="0.85">
-    <circle cx="256" cy="256" r="182" fill="none" stroke="#000" stroke-width="16"/>
-  </g>
-  <g filter="url(#speck)" opacity="0.55">
-    <circle cx="256" cy="256" r="150" fill="none" stroke="#000" stroke-width="26"/>
-  </g>
+  <!-- teeth: hooked carbide tips around the rim -->
+  <g fill="#c9ced6" stroke="#3a3f47" stroke-width="1.6" filter="url(#rough)"><path d="M445.7 267.4 L475.2 291.4 L453.8 248.1 Z"/><path d="M439.8 304.2 L464.1 333.4 L451.6 286.8 Z"/><path d="M426.9 339.1 L444.9 372.5 L441.8 324.4 Z"/><path d="M407.4 370.8 L418.6 407.2 L424.9 359.3 Z"/><path d="M382.1 398.2 L386.0 436.0 L401.5 390.3 Z"/><path d="M351.9 420.0 L348.4 457.9 L372.5 416.1 Z"/><path d="M318.1 435.6 L307.2 472.0 L339.0 435.8 Z"/><path d="M281.8 444.2 L264.1 477.9 L302.4 448.5 Z"/><path d="M244.6 445.7 L220.6 475.2 L263.9 453.8 Z"/><path d="M207.8 439.8 L178.6 464.1 L225.2 451.6 Z"/><path d="M172.9 426.9 L139.5 444.9 L187.6 441.8 Z"/><path d="M141.2 407.4 L104.8 418.6 L152.7 424.9 Z"/><path d="M113.8 382.1 L76.0 386.0 L121.7 401.5 Z"/><path d="M92.0 351.9 L54.1 348.4 L95.9 372.5 Z"/><path d="M76.4 318.1 L40.0 307.2 L76.2 339.0 Z"/><path d="M67.8 281.8 L34.1 264.1 L63.5 302.4 Z"/><path d="M66.3 244.6 L36.8 220.6 L58.2 263.9 Z"/><path d="M72.2 207.8 L47.9 178.6 L60.4 225.2 Z"/><path d="M85.1 172.9 L67.1 139.5 L70.2 187.6 Z"/><path d="M104.6 141.2 L93.4 104.8 L87.1 152.7 Z"/><path d="M129.9 113.8 L126.0 76.0 L110.5 121.7 Z"/><path d="M160.1 92.0 L163.6 54.1 L139.5 95.9 Z"/><path d="M193.9 76.4 L204.8 40.0 L173.0 76.2 Z"/><path d="M230.2 67.8 L247.9 34.1 L209.6 63.5 Z"/><path d="M267.4 66.3 L291.4 36.8 L248.1 58.2 Z"/><path d="M304.2 72.2 L333.4 47.9 L286.8 60.4 Z"/><path d="M339.1 85.1 L372.5 67.1 L324.4 70.2 Z"/><path d="M370.8 104.6 L407.2 93.4 L359.3 87.1 Z"/><path d="M398.2 129.9 L436.0 126.0 L390.3 110.5 Z"/><path d="M420.0 160.1 L457.9 163.6 L416.1 139.5 Z"/><path d="M435.6 193.9 L472.0 204.8 L435.8 173.0 Z"/><path d="M444.2 230.2 L477.9 247.9 L448.5 209.6 Z"/></g>
 
-  <!-- scratch marks across the blade -->
-  <g stroke="#0a0a10" stroke-width="2.5" opacity="0.8" filter="url(#rough)">
-    <path d="M110 190 L392 330"/>
-    <path d="M150 110 L360 400"/>
-    <path d="M96 280 L420 226"/>
-  </g>
+  <!-- rim highlight -->
+  <circle cx="256" cy="256" r="196" fill="none" stroke="#e8ecf2"
+          stroke-width="2.5" opacity="0.7" filter="url(#wob)"/>
 
-  <!-- circuit traces, solder nodes -->
-  <g stroke="#161b26" stroke-width="3.2" fill="none">
-    <path d="M256 256 L 256 132"/>
-    <path d="M256 256 L 366 202"/>
-    <path d="M256 256 L 338 354"/>
-    <path d="M256 256 L 162 338"/>
-    <path d="M256 256 L 150 192"/>
+  <!-- center: the red eye -->
+  <circle cx="256" cy="256" r="84" fill="url(#eye)"/>
+  <circle cx="256" cy="256" r="84" fill="none" stroke="#1a0b08" stroke-width="5"/>
+  <!-- pupil: vertical slit -->
+  <path d="M256 200 Q270 256 256 312 Q242 256 256 200 Z" fill="#12030a"/>
+  <circle cx="247" cy="243" r="9" fill="#ffb3a6" opacity="0.9"/>
+  <!-- bolt ring -->
+  <g fill="#3a3f47" stroke="#12151a" stroke-width="1.5">
+    <circle cx="256" cy="168" r="6"/>
+    <circle cx="326" cy="194" r="6"/>
+    <circle cx="352" cy="256" r="6"/>
+    <circle cx="326" cy="318" r="6"/>
+    <circle cx="256" cy="344" r="6"/>
+    <circle cx="186" cy="318" r="6"/>
+    <circle cx="160" cy="256" r="6"/>
+    <circle cx="186" cy="194" r="6"/>
   </g>
-  <g fill="#93a1b3" stroke="#0a0a10" stroke-width="1.4">
-    <circle cx="256" cy="132" r="7"/>
-    <circle cx="366" cy="202" r="7"/>
-    <circle cx="338" cy="354" r="7"/>
-    <circle cx="162" cy="338" r="7"/>
-    <circle cx="150" cy="192" r="7"/>
-  </g>
-
-  <!-- heart-node: rough-edged core -->
-  <g filter="url(#rough)">
-    <circle cx="256" cy="256" r="53" fill="#0a0a12" stroke="#e04a3a"
-            stroke-width="6"/>
-  </g>
-  <circle cx="256" cy="256" r="30" fill="none" stroke="#8a6c1a"
-          stroke-width="2" opacity="0.75"/>
-  <circle cx="256" cy="256" r="17" fill="#e04a3a"/>
-  <circle cx="250" cy="250" r="5" fill="#ff8a75" opacity="0.85"/>
+  <!-- arbor -->
+  <circle cx="256" cy="256" r="14" fill="#1a1d22" stroke="#050508" stroke-width="3"/>
 
   <text x="256" y="472" text-anchor="middle" fill="#8f9fb0"
         font-family="Menlo, monospace" font-size="30" letter-spacing="10"
