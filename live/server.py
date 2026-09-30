@@ -187,8 +187,9 @@ def startup():
           flush=True)
 
 @app.get("/health")
-def health():
-    return {"ok": _state["ready"], "model": MODEL_ID, "layer": LAYER}
+async def health():
+    return JSONResponse({"ok": _state["ready"], "model": MODEL_ID,
+                         "layer": LAYER})
 
 @app.get("/vector")
 def vector():
